@@ -1,0 +1,4062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GenAI Tool Selection Guide | Mornington Peninsula Shire</title>
+  <meta name="description" content="Find the right AI tool for your task. A practical guide for Mornington Peninsula Shire staff.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+  
+  <!-- React from CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Babel for JSX transformation (dev/prototype only) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    /* Base reset while React loads */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #203E3C; 
+      color: #EBEAE5;
+      min-height: 100vh;
+    }
+    #root {
+      min-height: 100vh;
+    }
+    /* Loading state */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-size: 1.2rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="loading">Loading...</div>
+  </div>
+
+  <script type="text/babel" data-type="module">
+const { useState, useEffect } = React;
+
+const glossaryData = [
+  {
+    category: 'Core Concepts',
+    description: 'The fundamental ideas behind how AI tools work',
+    terms: [
+      { term: 'Generative AI', definition: 'AI that creates new content (text, images, code) rather than just analysing existing content. ChatGPT, Claude, and the other tools in this guide are all generative AI.' },
+      { term: 'Large Language Model (LLM)', definition: 'The technology behind tools like ChatGPT and Claude. It\'s a system trained on vast amounts of text that predicts what words should come next, enabling it to write, answer questions, and have conversations.' },
+      { term: 'Model', definition: 'A specific version of an AI system. Think of it like software versions—GPT-4o and Claude Sonnet are different models with different capabilities. Newer models are generally more capable.' },
+      { term: 'Training data', definition: 'The text, books, websites, and other content that an AI learned from. The AI doesn\'t "remember" specific sources but has learned patterns from this material.' },
+      { term: 'Knowledge cutoff', definition: 'The date after which an AI has no information. If an AI has a January 2024 cutoff, it won\'t know about events after that date unless it can search the web.' }
+    ]
+  },
+  {
+    category: 'Working with AI',
+    description: 'Terms you\'ll encounter when using these tools',
+    terms: [
+      { term: 'Prompt', definition: 'What you type to the AI—your question, request, or instruction. Writing good prompts (being clear, specific, and providing context) helps you get better results.' },
+      { term: 'Context', definition: 'Background information that helps the AI understand your request. Including context like "I\'m writing to a resident who\'s frustrated" helps the AI tailor its response appropriately.' },
+      { term: 'Conversation / Thread', definition: 'An ongoing exchange with the AI. The AI remembers what you\'ve discussed within a conversation, so you can refine and build on earlier responses.' },
+      { term: 'Follow-up', definition: 'Asking the AI to adjust, expand, or refine its previous response. You can say things like "make it shorter" or "now do the same for the second point".' },
+      { term: 'System prompt', definition: 'Hidden instructions that shape how an AI behaves. You don\'t usually see these, but they\'re why ChatGPT and Claude have slightly different personalities.' }
+    ]
+  },
+  {
+    category: 'Understanding Outputs',
+    description: 'What to know about what AI produces',
+    terms: [
+      { term: 'Hallucination', definition: 'When AI confidently presents false information as fact. It might invent statistics, cite non-existent sources, or describe events that never happened. This is why you must always verify important facts.' },
+      { term: 'Confidence', definition: 'AI always sounds certain, even when wrong. Unlike humans, it won\'t say "I\'m not sure about this." This is a feature of how it works, not a sign of accuracy—always verify claims that matter.' },
+      { term: 'Citation', definition: 'A reference to a source. Perplexity provides citations automatically. Other tools may offer citations if asked, but be aware these can sometimes be hallucinated—check that cited sources actually exist.' },
+      { term: 'Token', definition: 'The units AI uses to process text—roughly ¾ of a word on average. "Council meeting" is about 3 tokens. Token limits affect how much text the AI can read or write in one go.' },
+      { term: 'Context window', definition: 'How much text an AI can "hold in mind" at once, measured in tokens. A larger context window means the AI can work with longer documents without forgetting the beginning.' }
+    ]
+  },
+  {
+    category: 'Safety & Privacy',
+    description: 'Understanding how your data is handled',
+    terms: [
+      { term: 'Enterprise data protection', definition: 'Security measures ensuring your prompts and responses aren\'t used to train AI models or seen by the AI provider. Copilot Chat provides this by default for Shire staff.' },
+      { term: 'Training on your data', definition: 'Some AI tools may use your conversations to improve their models. Public tools like ChatGPT may do this unless you opt out. This is why sensitive information should only go into Copilot Chat.' },
+      { term: 'Sensitive information', definition: 'Personal details, confidential documents, financial information, health records, or anything you wouldn\'t share publicly. Always use Copilot Chat for tasks involving sensitive information.' },
+      { term: 'Data retention', definition: 'How long an AI provider keeps your conversations. Policies vary by tool. Enterprise-protected tools like Copilot Chat have strict retention policies aligned with organisational requirements.' }
+    ]
+  },
+  {
+    category: 'Tool-Specific Terms',
+    description: 'Features specific to particular tools',
+    terms: [
+      { term: 'Pro Search (Perplexity)', definition: 'Perplexity\'s enhanced search mode that uses more sources, asks clarifying questions, and provides deeper analysis than standard searches.' },
+      { term: 'Deep Research', definition: 'An advanced mode (available in Perplexity and Gemini) that conducts extensive research across many sources and produces comprehensive reports. Takes longer but much more thorough.' },
+      { term: 'Artifacts (Claude)', definition: 'Claude\'s feature for creating standalone content like documents, code, or diagrams in a separate panel. Useful for producing work you\'ll use outside the conversation.' },
+      { term: 'Copilot Chat vs M365 Copilot', definition: 'Copilot Chat is the free, enterprise-protected AI chat available to all staff. M365 Copilot (the paid version) can also search your emails, SharePoint, and Teams—but isn\'t widely deployed at the Shire.' }
+    ]
+  }
+];
+
+const tools = {
+  chatgpt: { 
+    name: 'ChatGPT', 
+    tagline: 'Creative & conversational', 
+    color: '#9ACE6E', 
+    dark: '#43491D',
+    description: 'OpenAI\'s flagship conversational AI. Best for creative tasks, brainstorming, quick drafts, and conversational interactions. Now powered by GPT-5.2 with improved reasoning and memory.',
+    models: [
+      { name: 'GPT-5.2 Instant', desc: 'Fast, conversational model optimized for quick responses. Available to all tiers.' },
+      { name: 'GPT-5.2 Thinking', desc: 'Advanced reasoning model for complex analysis. Plus and Pro only.' },
+      { name: 'GPT-5.2 Pro', desc: 'Most powerful model with maximum capabilities. Pro tier only.' },
+      { name: 'GPT-5.1 Auto', desc: 'Automatically routes queries to the best model. Paid tiers.' },
+      { name: 'Legacy models', desc: 'GPT-4o, o3, o4-mini, 4.1 available via "Show additional models" toggle.' }
+    ],
+    tiers: [
+      { name: 'Free', price: '$0', features: 'Basic GPT-5.2 Instant access with usage limits' },
+      { name: 'Go', price: '$8/month', features: '10x more messages, file uploads, image creation, longer memory' },
+      { name: 'Plus', price: '$20/month', features: 'GPT-5.2 Thinking, Codex agent, higher limits' },
+      { name: 'Pro', price: '$200/month', features: 'Full GPT-5.2 Pro, maximum memory/context, early features' }
+    ],
+    keyFeatures: [
+      'Web Search — Integrated real-time web search',
+      'Image Generation — Built-in via DALL-E',
+      'Voice Mode — Natural conversation across all tiers',
+      'Memory — Persistent across conversations, improved in January 2026',
+      'Projects — Deep research, file uploads (Plus/Pro)',
+      'Thinking Modes — Standard, Extended, Light, Heavy options',
+      '128K token context window'
+    ],
+    bestFor: [
+      'Quick drafts and emails',
+      'Brainstorming and ideation',
+      'Creative writing and marketing copy',
+      'Social media content',
+      'Image generation',
+      'Voice conversations'
+    ],
+    tips: [
+      'Ask for multiple options (e.g., "give me 5 different approaches")',
+      'Use it conversationally—refine through back-and-forth',
+      'Enable memory for personalised responses over time',
+      'Use Projects to organise related conversations'
+    ],
+    limitations: [
+      'Can be confidently wrong—always verify facts',
+      'May prioritise engaging over accurate',
+      'Not suitable for sensitive Shire data (use Copilot Chat instead)'
+    ]
+  },
+  claude: { 
+    name: 'Claude', 
+    tagline: 'Thorough & nuanced', 
+    color: '#8CB3FF', 
+    dark: '#1E4371',
+    description: 'Anthropic\'s AI assistant. Excels at careful analysis, complex documents, nuanced writing, and coding. Claude Opus 4.5 uses up to 65% fewer tokens than previous models while delivering superior results.',
+    models: [
+      { name: 'Claude Opus 4.5', desc: 'Best for coding, agents, complex reasoning. Up to 65% more efficient. November 2025.' },
+      { name: 'Claude Sonnet 4.5', desc: 'Best coding model (77.2% SWE-bench). Can operate autonomously for 30+ hours.' },
+      { name: 'Claude Sonnet 4.5 Thinking', desc: 'Enhanced reasoning mode for deep technical analysis.' },
+      { name: 'Claude 3.7 Sonnet', desc: 'Hybrid reasoning model with adjustable thinking depth.' }
+    ],
+    tiers: [
+      { name: 'Free', price: '$0', features: 'Basic Claude access with usage limits' },
+      { name: 'Pro', price: '$20/month', features: 'Advanced features, web search, memory, health data analysis' },
+      { name: 'Max', price: '$100/month', features: 'Full model access including Opus 4.5 Thinking' },
+      { name: 'Team', price: 'Per seat', features: 'Memory features, incognito chats, collaboration' },
+      { name: 'Enterprise', price: 'Custom', features: 'Full memory, HIPAA-ready options, admin controls' }
+    ],
+    keyFeatures: [
+      'Web Search — Available for paid users (launched March 2025)',
+      'Artifacts — Generate and interact with code, documents, diagrams',
+      'Computer Use — Navigate computers via screen interpretation',
+      'Claude for Chrome — Browser extension for AI agent control',
+      'Memory — Remembers context, generates summaries, incognito option',
+      'Claude Code — Tool-rich agents with dynamic loading',
+      'Agent SDK — Memory handling, permissions, sub-agent coordination'
+    ],
+    bestFor: [
+      'Complex or nuanced documents',
+      'Policy and formal writing',
+      'Analysing long documents',
+      'Code writing and review',
+      'Structured problem analysis',
+      'Following detailed multi-part instructions'
+    ],
+    tips: [
+      'Give detailed, structured instructions—Claude follows them precisely',
+      'Great for documents with multiple sections or requirements',
+      'Use Artifacts for code and content you\'ll use outside the chat',
+      'Enable Thinking mode for complex reasoning tasks'
+    ],
+    limitations: [
+      'Can be overly cautious or hedge too much',
+      'Sometimes verbose when concise would be better',
+      'Not suitable for sensitive Shire data (use Copilot Chat instead)'
+    ]
+  },
+  perplexity: { 
+    name: 'Perplexity', 
+    tagline: 'Research & citations', 
+    color: '#FFC759', 
+    dark: '#4E4348',
+    description: 'AI-powered research tool that searches the web in real-time and provides cited answers. Now with Labs for creating reports, spreadsheets, and dashboards. Best when you need current, verifiable information.',
+    models: [
+      { name: 'Sonar', desc: 'Perplexity\'s own model (Llama 3.1 70B). Fast web search and summarisation.' },
+      { name: 'GPT-5.2', desc: 'OpenAI\'s model. Reasoning, coding, creativity with optional advanced reasoning.' },
+      { name: 'Claude Sonnet 4.5', desc: 'Anthropic\'s model. Efficient coding and technical reasoning.' },
+      { name: 'Gemini 3 Pro', desc: 'Google\'s model. Multimodal understanding, always-on reasoning.' },
+      { name: 'Grok 4.1', desc: 'xAI\'s model. Up-to-date search, handles text and images.' },
+      { name: 'Claude Opus 4.5', desc: 'Max subscribers only. Full depth reasoning for complex analysis.' }
+    ],
+    tiers: [
+      { name: 'Free', price: '$0', features: 'Basic searches with limited features' },
+      { name: 'Pro', price: '$20/month', features: 'Unlimited Pro searches, 20 research queries/day, 50 Labs queries/month' },
+      { name: 'Max', price: 'Higher', features: 'Unlimited Labs/research, frontier models, Comet browser, SOC 2 compliant' },
+      { name: 'Enterprise', price: 'Custom', features: 'Organisation-wide features, data insights, no seat minimum' }
+    ],
+    keyFeatures: [
+      'Pro Search — In-depth search with 3x sources, model selection',
+      '"Best" Mode — Auto-selects optimal model for each query',
+      'Deep Research — Multi-step analysis, hundreds of sources, comprehensive reports',
+      'Labs — Create reports, spreadsheets, dashboards, web applications',
+      'Memory — Remembers previous searches for smarter follow-ups',
+      '10x Citation Density — Enhanced source attribution',
+      'Image & Video Generation — Built-in capabilities (Pro: 3 videos/month)',
+      'Comet Browser — AI-powered browser with agent actions (Max only)'
+    ],
+    bestFor: [
+      'Current news and recent events',
+      'Fact-checking claims',
+      'Best practice research with citations',
+      'Academic and scholarly research',
+      'Creating research reports',
+      'Verifying information quickly'
+    ],
+    tips: [
+      'Use Deep Research for comprehensive analysis on complex topics',
+      'Check the cited sources—don\'t just trust the summary',
+      'Try different models for different query types',
+      'Use Labs to generate structured outputs like reports'
+    ],
+    limitations: [
+      'Less creative than ChatGPT or Claude for writing',
+      'Summaries can miss nuance in sources',
+      'Quality depends on what\'s available online',
+      'Not suitable for sensitive Shire data'
+    ]
+  },
+  gemini: { 
+    name: 'Google Gemini', 
+    tagline: 'Google integrated', 
+    color: '#FF9DCE', 
+    dark: '#4E4348',
+    description: 'Google\'s AI assistant. Now powered by Gemini 3 Pro with always-on reasoning. Strong integration with Google Workspace, NotebookLM, and Google Home. Includes video generation via Veo.',
+    models: [
+      { name: 'Gemini 3 Pro', desc: 'Flagship model with advanced always-on reasoning. Multimodal.' },
+      { name: 'Gemini 2.5 Pro', desc: 'Previous generation. Still very capable with 1M token context.' },
+      { name: 'Nano Banana', desc: 'Image generation model. Standard and Pro versions available.' }
+    ],
+    tiers: [
+      { name: 'Free', price: '$0', features: 'Basic Gemini access with limits' },
+      { name: 'Google AI Pro', price: '$20/month', features: '1,500 Thinking prompts/day, 500 Pro prompts/day, 200 Deep Research reports/day, 10 Deep Think/day' },
+      { name: 'Google AI Ultra', price: '$50/month', features: 'Highest Gemini 3 Pro access, 250 Dynamic view/day, enhanced NotebookLM, scheduled actions' }
+    ],
+    keyFeatures: [
+      'AI Mode — Search integration with agentic capabilities',
+      'Deep Research — Multi-step analysis and comprehensive reports',
+      'Deep Think — Extended reasoning with 192K token context',
+      'Video Generation — Veo 3.1 (5 videos/day on Pro)',
+      'Image Generation & Editing — Nano Banana models (up to 1,000/day)',
+      'NotebookLM Integration — Audio/video overviews, flashcards, quizzes',
+      'Google Home Integration — Gemini Live on Nest, automation creation',
+      'Jules/Code Assist/CLI — Development tools with high limits'
+    ],
+    bestFor: [
+      'Tasks involving Google Workspace',
+      'Image and video generation',
+      'Multimodal tasks (text + images + video)',
+      'Research with NotebookLM',
+      'Google ecosystem users',
+      'Home automation via Google Home'
+    ],
+    tips: [
+      'Use Deep Think for complex reasoning (limited daily use)',
+      'NotebookLM is excellent for analysing multiple documents together',
+      'Try AI Mode for search queries that need reasoning',
+      'Gemini 3 Pro\'s always-on reasoning means no manual toggle needed'
+    ],
+    limitations: [
+      'Some features require Google AI Pro/Ultra subscription',
+      'Best value if you\'re already in Google ecosystem',
+      'Video generation has daily limits',
+      'Not suitable for sensitive Shire data (use Copilot Chat instead)'
+    ]
+  },
+  copilot: { 
+    name: 'Copilot Chat', 
+    tagline: 'Enterprise protected', 
+    color: '#FFA69E', 
+    dark: '#203E3C',
+    description: 'Microsoft\'s enterprise-protected AI. Use this whenever your task involves sensitive, personal, or confidential information. Now powered by GPT-5 with Claude integration rolling out January 2026. Your data stays within Microsoft\'s service boundary.',
+    models: [
+      { name: 'GPT-5', desc: 'Default model powering all Copilot Chat experiences.' },
+      { name: 'GPT-5.2', desc: 'Latest model with enhanced prompting capabilities.' },
+      { name: 'Claude (Anthropic)', desc: 'Now integrated for enhanced reasoning and summarisation. Rolling out January 18–31, 2026.' }
+    ],
+    tiers: [
+      { name: 'Copilot Chat', price: 'Free*', features: 'Enterprise-protected AI chat for all M365 users. *Included with Shire M365 license.' },
+      { name: 'M365 Copilot', price: '$30/user/month', features: 'Full integration with your emails, documents, calendar, Teams. Not widely deployed at Shire.' }
+    ],
+    keyFeatures: [
+      'Enterprise Data Protection — Your data is never used for training',
+      'M365 Integration — Access Outlook inbox, calendar, Teams, meeting transcripts (M365 Copilot only)',
+      'Agent Mode — Works in Word, Excel, PowerPoint using web data and files',
+      'Claude Agent — Specialised agents powered by Claude model',
+      'Memory — Past chat reference, memory citations, temporary chat mode',
+      'Voice Notes — Record and convert to summaries in mobile app (coming Feb 2026)',
+      'Multi-Turn Conversations — Improved follow-ups and continuity',
+      'Declarative Agents — GPT-5 powered agents with advanced reasoning'
+    ],
+    bestFor: [
+      'Any task with sensitive information',
+      'Confidential documents',
+      'Personal data handling',
+      'Internal communications',
+      'Meeting transcription (Teams)',
+      'When data protection is required'
+    ],
+    tips: [
+      'Default to this for anything you wouldn\'t share publicly',
+      'Same underlying capability as ChatGPT, with enterprise protection',
+      'Available to all Shire staff via M365',
+      'Use temporary chat mode when you don\'t want conversation saved'
+    ],
+    limitations: [
+      'Copilot Chat cannot search your M365 data (emails, SharePoint)—that requires M365 Copilot license',
+      'Some features rolling out gradually through early 2026',
+      'May feel slightly less polished than consumer tools'
+    ],
+    isProtected: true
+  }
+};
+
+const comparisonFeatures = [
+  { feature: 'Web Search', chatgpt: true, gemini: true, claude: 'paid', copilot: true, perplexity: 'core' },
+  { feature: 'Image Generation', chatgpt: true, gemini: true, claude: false, copilot: true, perplexity: true },
+  { feature: 'Video Generation', chatgpt: false, gemini: true, claude: false, copilot: false, perplexity: true },
+  { feature: 'Voice Mode', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: true },
+  { feature: 'Code Execution', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: 'labs' },
+  { feature: 'Memory', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: true },
+  { feature: 'File Analysis', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: true },
+  { feature: 'Deep Research', chatgpt: false, gemini: true, claude: false, copilot: false, perplexity: true },
+  { feature: 'Browser Extension', chatgpt: false, gemini: false, claude: true, copilot: true, perplexity: true },
+  { feature: 'Enterprise Protected', chatgpt: false, gemini: false, claude: false, copilot: true, perplexity: false },
+  { feature: 'Agent Capabilities', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: 'labs' }
+];
+
+const costarSteps = [
+  {
+    id: 'context',
+    letter: 'C',
+    name: 'Context',
+    question: 'What\'s the background situation?',
+    description: 'Help the AI understand your specific scenario. Include relevant details about the situation, any history, or constraints.',
+    placeholder: 'e.g., A resident has complained about delayed bin collection for the third time this month. Previous responses promised improvement but the issue persists.',
+    examples: [
+      'We\'re launching a new online booking system for council facilities next month',
+      'A local business owner is disputing a parking fine issued outside their shop',
+      'Our team needs to present the annual community satisfaction survey results to councillors'
+    ]
+  },
+  {
+    id: 'objective',
+    letter: 'O',
+    name: 'Objective',
+    question: 'What do you want the AI to create?',
+    description: 'Be specific about what you need. The clearer your objective, the better the output.',
+    placeholder: 'e.g., Write a response email that acknowledges the ongoing issue, apologises sincerely, and outlines concrete steps we\'re taking to fix it.',
+    examples: [
+      'Draft talking points for a community meeting about the new development',
+      'Summarise this 40-page policy document into a 1-page briefing',
+      'Create a social media post announcing extended library hours'
+    ]
+  },
+  {
+    id: 'style',
+    letter: 'S',
+    name: 'Style',
+    question: 'What writing style fits this task?',
+    description: 'The style shapes how information is organised and presented.',
+    options: [
+      { value: 'professional', label: 'Professional', desc: 'Clear, businesslike, appropriate for official correspondence' },
+      { value: 'formal', label: 'Formal', desc: 'Traditional, structured, suitable for legal or ceremonial contexts' },
+      { value: 'conversational', label: 'Conversational', desc: 'Friendly and approachable, good for community engagement' },
+      { value: 'simplified', label: 'Plain language', desc: 'Easy to understand, avoids jargon, accessible to all' },
+      { value: 'technical', label: 'Technical', desc: 'Detailed and precise, appropriate for specialist audiences' },
+      { value: 'persuasive', label: 'Persuasive', desc: 'Compelling and engaging, designed to influence or motivate' }
+    ],
+    allowCustom: true,
+    customPlaceholder: 'Or describe a specific style...'
+  },
+  {
+    id: 'tone',
+    letter: 'T',
+    name: 'Tone',
+    question: 'What tone should it have?',
+    description: 'The tone sets the emotional quality—how it should "feel" to the reader.',
+    options: [
+      { value: 'empathetic', label: 'Empathetic', desc: 'Understanding and compassionate' },
+      { value: 'neutral', label: 'Neutral', desc: 'Balanced and objective' },
+      { value: 'apologetic', label: 'Apologetic', desc: 'Acknowledging fault, expressing regret' },
+      { value: 'confident', label: 'Confident', desc: 'Assured and authoritative' },
+      { value: 'friendly', label: 'Friendly', desc: 'Warm and personable' },
+      { value: 'serious', label: 'Serious', desc: 'Grave and considered' },
+      { value: 'enthusiastic', label: 'Enthusiastic', desc: 'Positive and energetic' }
+    ],
+    allowCustom: true,
+    customPlaceholder: 'Or describe a specific tone...'
+  },
+  {
+    id: 'audience',
+    letter: 'A',
+    name: 'Audience',
+    question: 'Who will read this?',
+    description: 'Knowing your audience helps the AI tailor vocabulary, detail level, and approach.',
+    options: [
+      { value: 'resident', label: 'Resident / Ratepayer', desc: 'General community member' },
+      { value: 'councillor', label: 'Councillor / Executive', desc: 'Elected officials or senior leadership' },
+      { value: 'internal', label: 'Internal staff', desc: 'Colleagues within the organisation' },
+      { value: 'business', label: 'Local business', desc: 'Business owners or commercial stakeholders' },
+      { value: 'media', label: 'Media / Public', desc: 'Journalists or general public audience' },
+      { value: 'technical', label: 'Technical specialist', desc: 'Subject matter experts' }
+    ],
+    allowCustom: true,
+    customPlaceholder: 'Or describe your specific audience...'
+  },
+  {
+    id: 'response',
+    letter: 'R',
+    name: 'Response',
+    question: 'What format do you need?',
+    description: 'Specify how you want the output structured.',
+    options: [
+      { value: 'email', label: 'Email', desc: 'Ready to send correspondence' },
+      { value: 'report', label: 'Report / Document', desc: 'Structured document with sections' },
+      { value: 'briefing', label: 'Briefing note', desc: 'Concise summary for decision-makers' },
+      { value: 'dotpoints', label: 'Dot points', desc: 'Bulleted list format' },
+      { value: 'paragraph', label: 'Paragraphs', desc: 'Flowing prose text' },
+      { value: 'social', label: 'Social media post', desc: 'Short, engaging content' },
+      { value: 'talking', label: 'Talking points', desc: 'Key messages for verbal delivery' },
+      { value: 'template', label: 'Template / Form', desc: 'Reusable structure with placeholders' }
+    ],
+    allowCustom: true,
+    customPlaceholder: 'Or specify format details (e.g., "3 paragraphs, under 200 words")...'
+  }
+];
+
+const taskData = [
+  { task: 'Quick drafts and emails', tool: 'chatgpt', category: 'writing' },
+  { task: 'Complex or nuanced documents', tool: 'claude', category: 'writing' },
+  { task: 'Policy or formal writing', tool: 'claude', category: 'writing' },
+  { task: 'Creative writing & marketing', tool: 'chatgpt', category: 'writing' },
+  { task: 'Proofreading and editing', tool: 'claude', category: 'writing' },
+  { task: 'Current information & news', tool: 'perplexity', category: 'research' },
+  { task: 'Fact-checking claims', tool: 'perplexity', category: 'research' },
+  { task: 'Best practice research', tool: 'perplexity', category: 'research' },
+  { task: 'Analysing uploaded documents', tool: 'claude', category: 'research' },
+  { task: 'Comparing policies', tool: 'claude', category: 'research' },
+  { task: 'Summarising lengthy reports', tool: 'claude', category: 'research' },
+  { task: 'Social media posts', tool: 'chatgpt', category: 'content' },
+  { task: 'Marketing copy', tool: 'chatgpt', category: 'content' },
+  { task: 'Newsletter articles', tool: 'chatgpt', category: 'content' },
+  { task: 'Formal communications', tool: 'claude', category: 'content' },
+  { task: 'Concept explanations', tool: 'claude', category: 'learning' },
+  { task: 'Step-by-step tutorials', tool: 'claude', category: 'learning' },
+  { task: 'Quick answers', tool: 'chatgpt', category: 'learning' },
+  { task: 'Current topics research', tool: 'perplexity', category: 'learning' },
+  { task: 'Practice Q&A roleplay', tool: 'chatgpt', category: 'learning' },
+  { task: 'Structured problem analysis', tool: 'claude', category: 'planning' },
+  { task: 'Brainstorming options', tool: 'chatgpt', category: 'planning' },
+  { task: 'Risk identification', tool: 'claude', category: 'planning' },
+  { task: 'Project planning', tool: 'claude', category: 'planning' },
+  { task: 'Stakeholder analysis', tool: 'claude', category: 'planning' },
+  { task: 'Code writing', tool: 'claude', category: 'technical' },
+  { task: 'Code review', tool: 'claude', category: 'technical' },
+  { task: 'Excel formulas', tool: 'chatgpt', category: 'technical' },
+  { task: 'Technical documentation', tool: 'claude', category: 'technical' },
+  { task: 'Meeting transcription', tool: 'copilot', category: 'meetings' },
+  { task: 'Creating agendas', tool: 'chatgpt', category: 'meetings' },
+  { task: 'Extracting action items', tool: 'claude', category: 'meetings' },
+  { task: 'Sensitive content handling', tool: 'copilot', category: 'sensitive' },
+  { task: 'Confidential information', tool: 'copilot', category: 'sensitive' },
+  { task: 'Personal data tasks', tool: 'copilot', category: 'sensitive' },
+];
+
+const questions = [
+  { id: 'sensitive', text: 'Does this involve sensitive, personal, or confidential information?', yes: 'copilot-direct', no: 'task-type' },
+  { id: 'task-type', text: 'What kind of work are you doing?', options: [
+    { label: 'Writing something', next: 'writing-type' },
+    { label: 'Finding information', next: 'research-type' },
+    { label: 'Creating content', next: 'content-type' },
+    { label: 'Learning or preparing', next: 'learning-type' },
+    { label: 'Solving a problem', next: 'problem-type' },
+    { label: 'Technical work', next: 'tech-type' },
+    { label: 'Meeting support', next: 'meeting-type' },
+  ]},
+  { id: 'writing-type', text: 'What\'s the nature of this writing?', options: [
+    { label: 'Quick draft or email', result: 'chatgpt' },
+    { label: 'Complex or formal document', result: 'claude' },
+    { label: 'Creative or marketing', result: 'chatgpt' },
+    { label: 'Editing or proofreading', result: 'claude' },
+  ]},
+  { id: 'research-type', text: 'What kind of research?', options: [
+    { label: 'Current news or events', result: 'perplexity' },
+    { label: 'Fact-checking something', result: 'perplexity' },
+    { label: 'Analysing a document I have', result: 'claude' },
+    { label: 'Comparing documents', result: 'claude' },
+  ]},
+  { id: 'content-type', text: 'What are you creating?', options: [
+    { label: 'Social media posts', result: 'chatgpt' },
+    { label: 'Marketing material', result: 'chatgpt' },
+    { label: 'Formal communication', result: 'claude' },
+    { label: 'Newsletter content', result: 'chatgpt' },
+  ]},
+  { id: 'learning-type', text: 'How do you want to learn?', options: [
+    { label: 'Detailed explanation', result: 'claude' },
+    { label: 'Quick answer', result: 'chatgpt' },
+    { label: 'Current information', result: 'perplexity' },
+    { label: 'Practice conversation', result: 'chatgpt' },
+  ]},
+  { id: 'problem-type', text: 'What\'s your approach?', options: [
+    { label: 'Structured analysis', result: 'claude' },
+    { label: 'Brainstorming ideas', result: 'chatgpt' },
+    { label: 'Risk assessment', result: 'claude' },
+    { label: 'Quick first thoughts', result: 'chatgpt' },
+  ]},
+  { id: 'tech-type', text: 'What technical task?', options: [
+    { label: 'Writing or reviewing code', result: 'claude' },
+    { label: 'Spreadsheet formulas', result: 'chatgpt' },
+    { label: 'Technical documentation', result: 'claude' },
+    { label: 'Finding current docs', result: 'perplexity' },
+  ]},
+  { id: 'meeting-type', text: 'What meeting support?', options: [
+    { label: 'Live transcription', result: 'copilot' },
+    { label: 'Creating agenda', result: 'chatgpt' },
+    { label: 'Processing notes', result: 'claude' },
+    { label: 'Prep questions', result: 'claude' },
+  ]},
+];
+
+function GenAIToolGuide() {
+  const [view, setView] = useState('home');
+  const [flowStep, setFlowStep] = useState('sensitive');
+  const [result, setResult] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedTool, setSelectedTool] = useState(null);
+  const [expandedGlossaryCategory, setExpandedGlossaryCategory] = useState(null);
+  const [builderStep, setBuilderStep] = useState(0);
+  const [builderData, setBuilderData] = useState({
+    context: '',
+    objective: '',
+    style: '',
+    styleCustom: '',
+    tone: '',
+    toneCustom: '',
+    audience: '',
+    audienceCustom: '',
+    response: '',
+    responseCustom: ''
+  });
+  const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [copyStatus, setCopyStatus] = useState('idle'); // idle, copying, copied, error
+  const [showValidation, setShowValidation] = useState(false);
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Simple stemming - removes common suffixes to match related words
+  const stem = (word) => {
+    return word.toLowerCase()
+      .replace(/ing$/, '')
+      .replace(/tion$/, '')
+      .replace(/ed$/, '')
+      .replace(/ly$/, '')
+      .replace(/ment$/, '')
+      .replace(/ness$/, '')
+      .replace(/ies$/, 'y')
+      .replace(/es$/, '')
+      .replace(/s$/, '');
+  };
+
+  // Check if query matches task using fuzzy logic
+  const matchesTask = (task, query) => {
+    const taskLower = task.toLowerCase();
+    const queryLower = query.toLowerCase();
+    
+    // Direct inclusion match
+    if (taskLower.includes(queryLower)) return true;
+    
+    // Stemmed word matching
+    const queryWords = queryLower.split(/\s+/);
+    const taskWords = taskLower.split(/\s+/);
+    
+    return queryWords.every(qWord => {
+      const stemmedQuery = stem(qWord);
+      return taskWords.some(tWord => {
+        const stemmedTask = stem(tWord);
+        return stemmedTask.includes(stemmedQuery) || stemmedQuery.includes(stemmedTask);
+      });
+    });
+  };
+
+  useEffect(() => {
+    if (searchQuery.length > 1) {
+      const filtered = taskData.filter(t => matchesTask(t.task, searchQuery));
+      setSearchResults(filtered);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
+  const suggestedTasks = [
+    'Quick drafts and emails',
+    'Policy or formal writing',
+    'Fact-checking claims',
+    'Analysing uploaded documents',
+    'Social media posts',
+    'Brainstorming options',
+    'Code review',
+    'Meeting transcription',
+  ];
+
+  const currentQuestion = questions.find(q => q.id === flowStep);
+
+  const handleFlowAnswer = (answer) => {
+    if (answer === 'copilot-direct') {
+      setResult('copilot');
+      setView('result');
+    } else if (typeof answer === 'object' && answer.result) {
+      setResult(answer.result);
+      setView('result');
+    } else if (typeof answer === 'object' && answer.next) {
+      setFlowStep(answer.next);
+    } else {
+      setFlowStep(answer);
+    }
+  };
+
+  const resetFlow = () => {
+    setFlowStep('sensitive');
+    setResult(null);
+    setView('home');
+  };
+
+  const openToolProfile = (toolKey) => {
+    setSelectedTool(toolKey);
+    setSearchQuery('');
+    setView('tool-profile');
+  };
+
+  // Prompt Builder Functions
+  const resetBuilder = () => {
+    setBuilderStep(0);
+    setBuilderData({
+      context: '',
+      objective: '',
+      style: '',
+      styleCustom: '',
+      tone: '',
+      toneCustom: '',
+      audience: '',
+      audienceCustom: '',
+      response: '',
+      responseCustom: ''
+    });
+    setGeneratedPrompt('');
+    setCopyStatus('idle');
+    setShowValidation(false);
+  };
+
+  const handleBuilderNext = () => {
+    if (canProceedBuilder()) {
+      setShowValidation(false);
+      setBuilderStep(builderStep + 1);
+    } else {
+      setShowValidation(true);
+    }
+  };
+
+  const openBuilder = () => {
+    resetBuilder();
+    setView('builder');
+  };
+
+  const getBuilderValue = (stepId) => {
+    const custom = builderData[`${stepId}Custom`];
+    const selected = builderData[stepId];
+    if (custom && custom.trim()) return custom;
+    if (selected) {
+      const step = costarSteps.find(s => s.id === stepId);
+      const option = step?.options?.find(o => o.value === selected);
+      return option ? option.label.toLowerCase() : selected;
+    }
+    return '';
+  };
+
+  const generatePrompt = () => {
+    const context = builderData.context.trim();
+    const objective = builderData.objective.trim();
+    const style = getBuilderValue('style');
+    const tone = getBuilderValue('tone');
+    const audience = getBuilderValue('audience');
+    const response = getBuilderValue('response');
+
+    let prompt = '';
+    
+    // Start with context as scene-setting
+    if (context) {
+      prompt += context;
+      if (!context.endsWith('.') && !context.endsWith('?') && !context.endsWith('!')) {
+        prompt += '.';
+      }
+      prompt += '\n\n';
+    }
+    
+    // Add objective as the core request
+    if (objective) {
+      prompt += objective;
+      if (!objective.endsWith('.') && !objective.endsWith('?') && !objective.endsWith('!')) {
+        prompt += '.';
+      }
+    }
+    
+    // Build the style/tone/audience/format line naturally
+    const qualifiers = [];
+    
+    if (style && tone) {
+      qualifiers.push(`Use a ${style}, ${tone} tone`);
+    } else if (style) {
+      qualifiers.push(`Use a ${style} style`);
+    } else if (tone) {
+      qualifiers.push(`Use a ${tone} tone`);
+    }
+    
+    if (audience) {
+      const audienceMap = {
+        'resident / ratepayer': 'a resident',
+        'councillor / executive': 'councillors/executive leadership',
+        'internal staff': 'internal colleagues',
+        'local business': 'a local business owner',
+        'media / public': 'a general audience',
+        'technical specialist': 'technical specialists'
+      };
+      const audienceText = audienceMap[audience] || audience;
+      qualifiers.push(`written for ${audienceText}`);
+    }
+    
+    if (response) {
+      const formatMap = {
+        'email': 'as a ready-to-send email',
+        'report / document': 'as a structured report with clear sections',
+        'briefing note': 'as a concise briefing note',
+        'dot points': 'as clear dot points',
+        'paragraphs': 'as flowing paragraphs',
+        'social media post': 'as a short social media post',
+        'talking points': 'as talking points for verbal delivery',
+        'template / form': 'as a reusable template'
+      };
+      qualifiers.push(formatMap[response] || `as ${response}`);
+    }
+    
+    if (qualifiers.length > 0) {
+      prompt += '\n\n';
+      // Capitalise first qualifier and join naturally
+      const first = qualifiers[0].charAt(0).toUpperCase() + qualifiers[0].slice(1);
+      if (qualifiers.length === 1) {
+        prompt += first + '.';
+      } else if (qualifiers.length === 2) {
+        prompt += first + ', ' + qualifiers[1] + '.';
+      } else {
+        prompt += first + ', ' + qualifiers.slice(1, -1).join(', ') + ', and ' + qualifiers[qualifiers.length - 1] + '.';
+      }
+    }
+
+    setGeneratedPrompt(prompt.trim());
+    setBuilderStep(costarSteps.length); // Move to results step
+  };
+
+  const copyPrompt = async () => {
+    setCopyStatus('copying');
+    try {
+      await navigator.clipboard.writeText(generatedPrompt);
+      setCopyStatus('copied');
+      setTimeout(() => setCopyStatus('idle'), 2000);
+    } catch (err) {
+      // Fallback for older browsers
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = generatedPrompt;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopyStatus('copied');
+        setTimeout(() => setCopyStatus('idle'), 2000);
+      } catch (fallbackErr) {
+        setCopyStatus('error');
+        setTimeout(() => setCopyStatus('idle'), 3000);
+      }
+    }
+  };
+
+  const canProceedBuilder = () => {
+    const step = costarSteps[builderStep];
+    if (!step) return false;
+    
+    if (step.id === 'context' || step.id === 'objective') {
+      return builderData[step.id].trim().length > 0;
+    }
+    // Optional steps can always proceed
+    return true;
+  };
+
+  const updateBuilderField = (field, value) => {
+    setBuilderData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const greeting = time.getHours() < 12 ? 'morning' : time.getHours() < 17 ? 'afternoon' : 'evening';
+
+  const toolTasks = selectedTool ? taskData.filter(t => t.tool === selectedTool) : [];
+
+  return (
+    <div className="app">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        .app {
+          font-family: 'Poppins', sans-serif;
+          min-height: 100vh;
+          background: #203E3C;
+          color: #EBEAE5;
+          overflow-x: hidden;
+        }
+
+        .blob {
+          position: fixed;
+          border-radius: 50%;
+          filter: blur(80px);
+          opacity: 0.4;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .blob-1 { width: 600px; height: 600px; background: #1E4371; top: -200px; right: -200px; }
+        .blob-2 { width: 400px; height: 400px; background: #43491D; bottom: -100px; left: -100px; }
+        .blob-3 { width: 300px; height: 300px; background: #4E4348; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        .container {
+          position: relative;
+          z-index: 1;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .skip-link {
+          position: absolute;
+          top: -100px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #9ACE6E;
+          color: #203E3C;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.9rem;
+          z-index: 1000;
+          transition: top 0.2s ease;
+          text-decoration: none;
+        }
+
+        .skip-link:focus {
+          top: 1rem;
+          outline: 2px solid #EBEAE5;
+          outline-offset: 2px;
+        }
+
+        .topbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem 3rem;
+          font-size: 0.85rem;
+          opacity: 0.7;
+        }
+        
+        .topbar-brand {
+          font-weight: 500;
+          letter-spacing: 0.5px;
+        }
+
+        .topbar-right {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+        }
+
+        .topbar-link {
+          background: transparent;
+          border: 1px solid rgba(235,234,229,0.3);
+          color: #EBEAE5;
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .topbar-link:hover {
+          background: rgba(235,234,229,0.1);
+          border-color: rgba(235,234,229,0.5);
+        }
+
+        .topbar-version {
+          opacity: 0.7;
+        }
+
+        .main {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          padding: 0 3rem 3rem;
+          max-width: 1400px;
+          margin: 0 auto;
+          width: 100%;
+        }
+
+        .main:focus {
+          outline: none;
+        }
+
+        .home-layout {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 4rem;
+          align-items: center;
+          flex: 1;
+        }
+
+        .home-left h1 {
+          font-size: clamp(2.5rem, 6vw, 4.5rem);
+          font-weight: 300;
+          line-height: 1.1;
+          margin-bottom: 1.5rem;
+        }
+
+        .home-left h1 strong {
+          font-weight: 700;
+          display: block;
+          color: #9ACE6E;
+        }
+
+        .home-left p {
+          font-size: 1.1rem;
+          line-height: 1.7;
+          opacity: 0.8;
+          max-width: 480px;
+          margin-bottom: 2.5rem;
+        }
+
+        .home-actions {
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+
+        /* Global focus styles for accessibility */
+        *:focus-visible {
+          outline: 2px solid #9ACE6E;
+          outline-offset: 2px;
+        }
+
+        button:focus:not(:focus-visible) {
+          outline: none;
+        }
+
+        .btn {
+          padding: 1rem 2rem;
+          border-radius: 60px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .btn:active {
+          transform: scale(0.98);
+        }
+
+        .btn-primary {
+          background: #EBEAE5;
+          color: #203E3C;
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+        }
+
+        .btn-secondary {
+          background: transparent;
+          color: #EBEAE5;
+          border: 2px solid rgba(235,234,229,0.3);
+        }
+
+        .btn-secondary:hover {
+          border-color: #EBEAE5;
+          background: rgba(235,234,229,0.1);
+        }
+
+        .btn-arrow {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #203E3C;
+          color: #EBEAE5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.9rem;
+        }
+
+        /* Redesigned Home Layout */
+        .home-subtitle {
+          font-size: 1.1rem;
+          opacity: 0.7;
+          margin-bottom: 2.5rem;
+          max-width: 400px;
+        }
+
+        .home-primary-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+
+        .btn-large {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1.25rem 1.5rem;
+          text-align: left;
+        }
+
+        .btn-large .btn-icon {
+          font-size: 1.5rem;
+        }
+
+        .btn-large .btn-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .btn-large .btn-content strong {
+          font-size: 1rem;
+        }
+
+        .btn-large .btn-content small {
+          font-size: 0.8rem;
+          opacity: 0.8;
+          font-weight: 400;
+        }
+
+        .home-secondary-actions {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .btn-text {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.6rem 1rem;
+          background: transparent;
+          border: none;
+          color: rgba(235,234,229,0.7);
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border-radius: 8px;
+        }
+
+        .btn-text:hover {
+          color: #EBEAE5;
+          background: rgba(235,234,229,0.08);
+        }
+
+        .btn-text span {
+          font-size: 1rem;
+        }
+
+        /* Tools Grid */
+        .tools-grid-section {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .tools-grid-label {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          opacity: 0.6;
+          margin-bottom: 1rem;
+          text-align: center;
+        }
+
+        .tools-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.75rem;
+        }
+
+        .tools-grid .tool-card:nth-child(4),
+        .tools-grid .tool-card:nth-child(5) {
+          grid-column: span 1;
+        }
+
+        .tool-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 1.25rem 1rem;
+          background: rgba(235,234,229,0.04);
+          border: 1px solid rgba(235,234,229,0.1);
+          border-radius: 16px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-align: center;
+          font-family: 'Poppins', sans-serif;
+        }
+
+        .tool-card:hover {
+          background: rgba(235,234,229,0.08);
+          border-color: var(--tool-color);
+          transform: translateY(-2px);
+        }
+
+        .tool-card.protected {
+          border-color: rgba(255,166,158,0.3);
+        }
+
+        .tool-card-header {
+          position: relative;
+          margin-bottom: 0.75rem;
+        }
+
+        .tool-card-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 1.25rem;
+        }
+
+        .tool-protected-badge {
+          position: absolute;
+          top: -4px;
+          right: -8px;
+          width: 18px;
+          height: 18px;
+          background: #FFA69E;
+          color: #4E4348;
+          border-radius: 50%;
+          font-size: 0.65rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .tool-card-name {
+          font-weight: 600;
+          font-size: 0.95rem;
+          color: #EBEAE5;
+          margin-bottom: 0.2rem;
+        }
+
+        .tool-card-tagline {
+          font-size: 0.75rem;
+          color: rgba(235,234,229,0.65);
+        }
+
+        /* Legacy tools-viz - keep for backward compatibility */
+        .tools-viz {
+          display: none;
+        }
+
+        /* Tool Profile View */
+        .profile-view {
+          flex: 1;
+          animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        /* Profile Navigation */
+        .profile-nav {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2rem;
+        }
+
+        .profile-back-btn {
+          background: transparent;
+          border: none;
+          color: rgba(235,234,229,0.6);
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.9rem;
+          cursor: pointer;
+          padding: 0.5rem 0;
+          transition: color 0.2s ease;
+        }
+
+        .profile-back-btn:hover {
+          color: #EBEAE5;
+        }
+
+        .profile-nav-tools {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .profile-nav-tool {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: none;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.8rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          opacity: 0.7;
+        }
+
+        .profile-nav-tool:hover {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+
+        /* Profile Hero */
+        .profile-hero {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .profile-icon {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .profile-icon span {
+          font-size: 2rem;
+          font-weight: 700;
+        }
+
+        .profile-title h1 {
+          font-size: 2.25rem;
+          font-weight: 700;
+          margin-bottom: 0.25rem;
+        }
+
+        .profile-tagline {
+          font-size: 1rem;
+          opacity: 0.7;
+          margin-bottom: 0.5rem;
+        }
+
+        .profile-protected-inline {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          padding: 0.3rem 0.75rem;
+          background: rgba(255,166,158,0.15);
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #FFA69E;
+        }
+
+        .profile-back {
+          margin-left: auto;
+        }
+
+        .profile-description {
+          font-size: 1.1rem;
+          line-height: 1.7;
+          max-width: 800px;
+          margin-bottom: 2rem;
+          opacity: 0.85;
+        }
+
+        .profile-quick-actions {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 3rem;
+          flex-wrap: wrap;
+        }
+
+        .profile-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1.25rem;
+          margin-bottom: 3rem;
+        }
+
+        .profile-card {
+          background: rgba(235,234,229,0.04);
+          border: 1px solid rgba(235,234,229,0.08);
+          border-radius: 16px;
+          padding: 1.5rem;
+          transition: all 0.2s ease;
+        }
+
+        .profile-card:hover {
+          background: rgba(235,234,229,0.06);
+          border-color: rgba(235,234,229,0.12);
+        }
+
+        .profile-card.highlight {
+          background: rgba(154,206,110,0.08);
+          border-color: rgba(154,206,110,0.2);
+        }
+
+        .profile-card.caution {
+          background: rgba(255,166,158,0.06);
+          border-color: rgba(255,166,158,0.15);
+        }
+
+        .profile-card h3 {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          opacity: 0.5;
+          margin-bottom: 1rem;
+        }
+
+        .profile-card ul {
+          list-style: none;
+        }
+
+        .profile-card li {
+          padding: 0.6rem 0;
+          border-bottom: 1px solid rgba(235,234,229,0.08);
+          font-size: 0.95rem;
+          line-height: 1.5;
+        }
+
+        .profile-card li:last-child {
+          border-bottom: none;
+        }
+
+        .model-item {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .model-name {
+          font-weight: 600;
+        }
+
+        .model-desc {
+          font-size: 0.85rem;
+          opacity: 0.7;
+        }
+
+        /* Profile Tiers Section */
+        .section-title {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-bottom: 1.25rem;
+          color: #EBEAE5;
+        }
+
+        .profile-tiers {
+          margin-bottom: 2.5rem;
+        }
+
+        .tiers-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+        }
+
+        .tier-card {
+          background: rgba(235,234,229,0.04);
+          border: 1px solid rgba(235,234,229,0.1);
+          border-radius: 14px;
+          padding: 1.25rem;
+          transition: all 0.2s ease;
+        }
+
+        .tier-card:hover {
+          background: rgba(235,234,229,0.07);
+          border-color: rgba(235,234,229,0.15);
+        }
+
+        .tier-card.free {
+          border-color: rgba(154,206,110,0.3);
+          background: rgba(154,206,110,0.05);
+        }
+
+        .tier-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          margin-bottom: 0.75rem;
+          gap: 0.5rem;
+        }
+
+        .tier-name {
+          font-weight: 600;
+          font-size: 1rem;
+        }
+
+        .tier-price {
+          font-size: 0.85rem;
+          color: #9ACE6E;
+          font-weight: 500;
+        }
+
+        .tier-features {
+          font-size: 0.85rem;
+          line-height: 1.5;
+          opacity: 0.7;
+        }
+
+        /* Profile Features Section */
+        .profile-features {
+          margin-bottom: 2.5rem;
+        }
+
+        .features-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 0.75rem 1.5rem;
+        }
+
+        .feature-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+          font-size: 0.95rem;
+          line-height: 1.5;
+        }
+
+        .feature-check {
+          color: #9ACE6E;
+          font-weight: 600;
+          flex-shrink: 0;
+        }
+
+        .profile-tasks {
+          margin-bottom: 3rem;
+        }
+
+        .profile-tasks h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 1.25rem;
+        }
+
+        .task-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+        }
+
+        .task-chip {
+          padding: 0.6rem 1.25rem;
+          border-radius: 30px;
+          background: rgba(235,234,229,0.08);
+          font-size: 0.9rem;
+          border: 1px solid rgba(235,234,229,0.15);
+        }
+
+        .protected-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: rgba(255,166,158,0.2);
+          color: #FFA69E;
+          padding: 0.5rem 1rem;
+          border-radius: 30px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          margin-bottom: 1.5rem;
+        }
+
+        /* Search overlay */
+        .search-view {
+          position: fixed;
+          inset: 0;
+          background: rgba(32,62,60,0.98);
+          backdrop-filter: blur(20px);
+          z-index: 100;
+          display: flex;
+          flex-direction: column;
+          padding: 2rem 3rem;
+          animation: fadeIn 0.2s ease;
+        }
+
+        .search-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2rem;
+        }
+
+        .search-back {
+          background: transparent;
+          border: none;
+          color: rgba(235,234,229,0.6);
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.9rem;
+          cursor: pointer;
+          padding: 0.5rem 0;
+          transition: color 0.2s ease;
+        }
+
+        .search-back:hover {
+          color: #EBEAE5;
+        }
+
+        .search-close {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(235,234,229,0.1);
+          color: #EBEAE5;
+          font-size: 1.5rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .search-close:hover {
+          background: rgba(235,234,229,0.2);
+        }
+
+        .search-input-wrap {
+          max-width: 700px;
+          margin: 0 auto;
+          width: 100%;
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 0;
+          width: 20px;
+          height: 20px;
+          border: 2px solid rgba(235,234,229,0.4);
+          border-radius: 50%;
+        }
+
+        .search-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 3px solid rgba(235,234,229,0.2);
+          padding: 1.5rem 2.5rem 1.5rem 3rem;
+          font-family: 'Poppins', sans-serif;
+          font-size: 2rem;
+          font-weight: 300;
+          color: #EBEAE5;
+          outline: none;
+          transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+          border-color: #9ACE6E;
+        }
+
+        .search-input::placeholder {
+          color: rgba(235,234,229,0.3);
+        }
+
+        .search-clear {
+          position: absolute;
+          right: 0;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(235,234,229,0.1);
+          color: rgba(235,234,229,0.6);
+          font-size: 1.25rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .search-clear:hover {
+          background: rgba(235,234,229,0.2);
+          color: #EBEAE5;
+        }
+
+        .search-results {
+          max-width: 700px;
+          margin: 2rem auto 0;
+          width: 100%;
+          flex: 1;
+          overflow-y: auto;
+        }
+
+        .search-suggestions {
+          animation: fadeIn 0.3s ease;
+        }
+
+        .suggestions-label, .results-count {
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: rgba(235,234,229,0.4);
+          margin-bottom: 1.25rem;
+        }
+
+        .suggestions-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .suggestion-chip {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 1.25rem;
+          background: rgba(235,234,229,0.04);
+          border: 1px solid rgba(235,234,229,0.08);
+          border-radius: 12px;
+          color: #EBEAE5;
+          font-family: 'Poppins', sans-serif;
+          font-size: 1rem;
+          text-align: left;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .suggestion-chip:hover {
+          background: rgba(235,234,229,0.08);
+          border-color: rgba(235,234,229,0.15);
+          transform: translateX(4px);
+        }
+
+        .suggestion-task {
+          flex: 1;
+        }
+
+        .suggestion-tool {
+          padding: 0.35rem 0.85rem;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          flex-shrink: 0;
+          margin-left: 1rem;
+        }
+
+        .search-results-list {
+          animation: fadeIn 0.2s ease;
+        }
+
+        .search-result {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          padding: 1rem 0;
+          border: none;
+          border-bottom: 1px solid rgba(235,234,229,0.08);
+          background: transparent;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-family: 'Poppins', sans-serif;
+          text-align: left;
+        }
+
+        .search-result:hover {
+          padding-left: 1rem;
+          background: rgba(235,234,229,0.03);
+        }
+
+        .search-result-task {
+          font-size: 1.05rem;
+          color: #EBEAE5;
+        }
+
+        .search-result-tool {
+          padding: 0.4rem 1rem;
+          border-radius: 30px;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        .search-empty {
+          text-align: center;
+          padding: 3rem 1rem;
+          animation: fadeIn 0.3s ease;
+        }
+
+        .empty-icon {
+          font-size: 3rem;
+          display: block;
+          margin-bottom: 1rem;
+        }
+
+        .empty-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+
+        .empty-hint {
+          color: rgba(235,234,229,0.5);
+          margin-bottom: 1.5rem;
+        }
+
+        /* Flow view - Redesigned */
+        .flow-view {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 2rem;
+          animation: fadeIn 0.3s ease;
+        }
+
+        .flow-back-top {
+          align-self: flex-start;
+          background: transparent;
+          border: none;
+          color: rgba(235,234,229,0.5);
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.9rem;
+          cursor: pointer;
+          padding: 0.5rem 0;
+          margin-bottom: 2rem;
+          transition: color 0.2s ease;
+        }
+
+        .flow-back-top:hover {
+          color: #EBEAE5;
+        }
+
+        .flow-card {
+          background: rgba(235,234,229,0.03);
+          border: 1px solid rgba(235,234,229,0.08);
+          border-radius: 24px;
+          padding: 3rem;
+          max-width: 600px;
+          width: 100%;
+          text-align: center;
+        }
+
+        .flow-progress {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0;
+          margin-bottom: 2.5rem;
+        }
+
+        .flow-step {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(235,234,229,0.08);
+          border: 2px solid rgba(235,234,229,0.15);
+          font-weight: 600;
+          font-size: 0.9rem;
+          color: rgba(235,234,229,0.4);
+          transition: all 0.3s ease;
+        }
+
+        .flow-step.active {
+          background: #9ACE6E;
+          border-color: #9ACE6E;
+          color: #203E3C;
+          transform: scale(1.1);
+        }
+
+        .flow-step.complete {
+          background: rgba(154,206,110,0.2);
+          border-color: #9ACE6E;
+          color: #9ACE6E;
+        }
+
+        .flow-connector {
+          width: 40px;
+          height: 2px;
+          background: rgba(235,234,229,0.15);
+        }
+
+        .flow-question {
+          font-size: clamp(1.5rem, 4vw, 2rem);
+          font-weight: 600;
+          line-height: 1.4;
+          margin-bottom: 2rem;
+        }
+
+        .flow-options {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          width: 100%;
+        }
+
+        .flow-option {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 1.25rem 1.5rem;
+          border-radius: 14px;
+          border: 2px solid rgba(235,234,229,0.12);
+          background: rgba(0,0,0,0.15);
+          color: #EBEAE5;
+          font-family: 'Poppins', sans-serif;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-align: left;
+        }
+
+        .flow-option:hover {
+          border-color: #9ACE6E;
+          background: rgba(154,206,110,0.08);
+        }
+
+        .flow-option-arrow {
+          opacity: 0;
+          transform: translateX(-8px);
+          transition: all 0.2s ease;
+          color: #9ACE6E;
+        }
+
+        .flow-option:hover .flow-option-arrow {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .flow-binary {
+          flex-direction: row;
+          gap: 1rem;
+        }
+
+        .flow-binary .flow-option {
+          flex: 1;
+          flex-direction: column;
+          text-align: center;
+          padding: 1.5rem;
+          gap: 0.5rem;
+        }
+
+        .flow-option-icon {
+          font-size: 1.25rem;
+          opacity: 0.7;
+        }
+
+        .flow-binary .flow-option.yes:hover {
+          border-color: #FFA69E;
+          background: rgba(255,166,158,0.1);
+        }
+
+        .flow-binary .flow-option.no:hover {
+          border-color: #9ACE6E;
+          background: rgba(154,206,110,0.08);
+        }
+
+        /* Result view - Redesigned */
+        .result-view {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 2rem;
+          animation: fadeIn 0.3s ease;
+        }
+
+        .result-card {
+          background: rgba(235,234,229,0.03);
+          border: 1px solid rgba(235,234,229,0.08);
+          border-radius: 24px;
+          padding: 2.5rem;
+          max-width: 480px;
+          width: 100%;
+          text-align: center;
+          animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        .result-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          background: rgba(154,206,110,0.15);
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #9ACE6E;
+          margin-bottom: 1.5rem;
+        }
+
+        .result-badge span {
+          font-size: 0.9rem;
+        }
+
+        .result-tool {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1.25rem 1.5rem;
+          border-radius: 16px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          margin-bottom: 1.5rem;
+        }
+
+        .result-tool:hover {
+          transform: scale(1.02);
+          box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .result-tool-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          font-weight: 700;
+          flex-shrink: 0;
+        }
+
+        .result-tool-info {
+          text-align: left;
+        }
+
+        .result-tool-name {
+          display: block;
+          font-size: 1.5rem;
+          font-weight: 700;
+        }
+
+        .result-tool-tagline {
+          display: block;
+          font-size: 0.9rem;
+          opacity: 0.8;
+        }
+
+        .result-reason {
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: rgba(235,234,229,0.8);
+          margin-bottom: 2rem;
+        }
+
+        .result-actions {
+          display: flex;
+          gap: 0.75rem;
+        }
+
+        .result-actions .btn {
+          flex: 1;
+        }
+
+        .result-alternatives {
+          margin-top: 2rem;
+          width: 100%;
+          max-width: 480px;
+        }
+
+        .alternatives-label {
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: rgba(235,234,229,0.55);
+          margin-bottom: 1rem;
+          text-align: center;
+        }
+
+        .alternatives-grid {
+          display: flex;
+          justify-content: center;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+
+        .alternative-chip {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.6rem 1rem;
+          background: rgba(235,234,229,0.05);
+          border: 1px solid rgba(235,234,229,0.1);
+          border-radius: 30px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-family: 'Poppins', sans-serif;
+        }
+
+        .alternative-chip:hover {
+          background: rgba(235,234,229,0.1);
+          border-color: rgba(235,234,229,0.2);
+        }
+
+        .alt-icon {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.8rem;
+          font-weight: 700;
+        }
+
+        .alt-name {
+          font-size: 0.85rem;
+          color: #EBEAE5;
+        }
+
+        /* Legacy flow-back and result styles - keep for backward compatibility */
+        .flow-back {
+          display: none;
+        }
+
+        .result-label, .result-tip, .result-profile-link {
+          display: none;
+        }
+
+        .result-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+
+        /* Footer */
+        .footer {
+          background: linear-gradient(to bottom, transparent, rgba(30, 67, 113, 0.3));
+          padding: 2rem 3rem;
+          margin-top: auto;
+        }
+
+        .footer-inner {
+          max-width: 1400px;
+          margin: 0 auto;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 2rem;
+        }
+
+        .footer-reminders {
+          display: flex;
+          gap: 2.5rem;
+          flex-wrap: wrap;
+        }
+
+        .reminder-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          font-size: 0.85rem;
+          opacity: 0.8;
+        }
+
+        .reminder-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #9ACE6E;
+          flex-shrink: 0;
+        }
+
+        .footer-contact {
+          font-size: 0.85rem;
+          opacity: 0.6;
+        }
+
+        /* Reference view */
+        .reference-view {
+          padding-top: 2rem;
+        }
+
+        .reference-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          margin-bottom: 3rem;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+
+        .reference-header h2 {
+          font-size: 2.5rem;
+          font-weight: 300;
+        }
+
+        .reference-header h2 strong {
+          font-weight: 700;
+        }
+
+        .reference-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 1rem;
+        }
+
+        .ref-card {
+          background: rgba(235,234,229,0.05);
+          border: 1px solid rgba(235,234,229,0.1);
+          border-radius: 16px;
+          padding: 1.5rem;
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+
+        .ref-card:hover {
+          background: rgba(235,234,229,0.08);
+          border-color: rgba(235,234,229,0.2);
+        }
+
+        .ref-card-task {
+          font-size: 1rem;
+          font-weight: 500;
+          margin-bottom: 0.75rem;
+        }
+
+        .ref-card-tool {
+          display: inline-block;
+          padding: 0.35rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        /* Glossary View */
+        .glossary-view {
+          padding-top: 1rem;
+          animation: fadeIn 0.3s ease;
+        }
+
+        .glossary-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 2rem;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+
+        .glossary-title-section h2 {
+          font-size: 2.5rem;
+          font-weight: 300;
+          margin-bottom: 0.5rem;
+        }
+
+        .glossary-title-section h2 strong {
+          font-weight: 700;
+        }
+
+        .glossary-subtitle {
+          font-size: 1rem;
+          opacity: 0.7;
+        }
+
+        .glossary-intro {
+          max-width: 700px;
+          margin-bottom: 2.5rem;
+        }
+
+        .glossary-intro p {
+          font-size: 1.05rem;
+          line-height: 1.7;
+          opacity: 0.85;
+        }
+
+        .glossary-categories {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          margin-bottom: 3rem;
+        }
+
+        .glossary-category {
+          background: rgba(235,234,229,0.03);
+          border: 1px solid rgba(235,234,229,0.1);
+          border-radius: 16px;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+
+        .glossary-category.expanded {
+          background: rgba(235,234,229,0.06);
+          border-color: rgba(235,234,229,0.2);
+        }
+
+        .glossary-category-header {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem;
+          background: transparent;
+          border: none;
+          color: #EBEAE5;
+          cursor: pointer;
+          text-align: left;
+          font-family: 'Poppins', sans-serif;
+          transition: background 0.2s ease;
+        }
+
+        .glossary-category-header:hover {
+          background: rgba(235,234,229,0.05);
+        }
+
+        .glossary-category-info {
+          display: flex;
+          align-items: center;
+          gap: 1.25rem;
+        }
+
+        .glossary-category-number {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: rgba(154,206,110,0.2);
+          color: #9ACE6E;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          font-size: 0.9rem;
+          flex-shrink: 0;
+        }
+
+        .glossary-category-info h3 {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+        }
+
+        .glossary-category-info p {
+          font-size: 0.85rem;
+          opacity: 0.6;
+          margin: 0;
+        }
+
+        .glossary-expand-icon {
+          font-size: 1.5rem;
+          opacity: 0.5;
+          font-weight: 300;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .glossary-terms {
+          padding: 0 1.5rem 1.5rem 1.5rem;
+          animation: fadeIn 0.3s ease;
+        }
+
+        .glossary-term {
+          padding: 1.25rem 0;
+          border-bottom: 1px solid rgba(235,234,229,0.08);
+        }
+
+        .glossary-term:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+
+        .glossary-term dt {
+          font-weight: 600;
+          font-size: 1rem;
+          margin-bottom: 0.5rem;
+          color: #9ACE6E;
+        }
+
+        .glossary-term dd {
+          font-size: 0.95rem;
+          line-height: 1.7;
+          opacity: 0.85;
+          margin: 0;
+        }
+
+        .glossary-footer-note {
+          background: rgba(140,179,255,0.1);
+          border: 1px solid rgba(140,179,255,0.2);
+          border-radius: 12px;
+          padding: 1.25rem 1.5rem;
+          margin-top: 1rem;
+        }
+
+        .glossary-footer-note p {
+          font-size: 0.9rem;
+          opacity: 0.8;
+          margin: 0;
+        }
+
+        /* Compare View */
+        .compare-view {
+          padding-top: 1rem;
+          animation: fadeIn 0.3s ease;
+        }
+
+        .compare-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 2rem;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+
+        .compare-title-section h2 {
+          font-size: 2.5rem;
+          font-weight: 300;
+          margin-bottom: 0.5rem;
+        }
+
+        .compare-title-section h2 strong {
+          font-weight: 700;
+        }
+
+        .compare-subtitle {
+          font-size: 1rem;
+          opacity: 0.7;
+        }
+
+        .compare-table-wrapper {
+          overflow-x: auto;
+          margin-bottom: 2rem;
+          border-radius: 16px;
+          border: 1px solid rgba(235,234,229,0.1);
+        }
+
+        .compare-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.95rem;
+        }
+
+        .compare-table thead {
+          background: rgba(235,234,229,0.05);
+        }
+
+        .compare-table th {
+          padding: 1.25rem 1rem;
+          text-align: center;
+          font-weight: 500;
+          border-bottom: 1px solid rgba(235,234,229,0.1);
+        }
+
+        .compare-feature-col {
+          text-align: left !important;
+          min-width: 160px;
+        }
+
+        .compare-tool-col {
+          min-width: 100px;
+        }
+
+        .compare-tool-header {
+          background: transparent;
+          border: none;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.9rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: opacity 0.2s ease;
+        }
+
+        .compare-tool-header:hover {
+          opacity: 0.7;
+        }
+
+        .compare-table tbody tr {
+          border-bottom: 1px solid rgba(235,234,229,0.06);
+          transition: background 0.2s ease;
+        }
+
+        .compare-table tbody tr:hover {
+          background: rgba(235,234,229,0.03);
+        }
+
+        .compare-table tbody tr:last-child {
+          border-bottom: none;
+        }
+
+        .compare-table td {
+          padding: 1rem;
+          text-align: center;
+        }
+
+        .compare-feature-name {
+          text-align: left !important;
+          font-weight: 500;
+        }
+
+        .compare-yes {
+          color: #9ACE6E;
+          font-weight: 600;
+        }
+
+        .compare-no {
+          opacity: 0.3;
+        }
+
+        .compare-partial {
+          color: #FFC759;
+          font-size: 0.8rem;
+          font-weight: 500;
+        }
+
+        .compare-legend {
+          display: flex;
+          gap: 2rem;
+          justify-content: center;
+          margin-bottom: 1.5rem;
+          font-size: 0.85rem;
+          opacity: 0.7;
+          flex-wrap: wrap;
+        }
+
+        .compare-legend span {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .legend-yes {
+          color: #9ACE6E;
+          font-weight: 600;
+        }
+
+        .legend-partial {
+          color: #FFC759;
+          font-size: 0.75rem;
+          background: rgba(255,199,89,0.15);
+          padding: 0.15rem 0.4rem;
+          border-radius: 4px;
+        }
+
+        .legend-no {
+          opacity: 0.4;
+        }
+
+        .compare-note {
+          text-align: center;
+          opacity: 0.6;
+          font-size: 0.85rem;
+        }
+
+        /* Prompt Builder Styles - Redesigned */
+        .builder-view {
+          animation: fadeIn 0.3s ease;
+        }
+
+        .builder-layout {
+          display: grid;
+          grid-template-columns: 1fr 380px;
+          gap: 2rem;
+          align-items: start;
+        }
+
+        .builder-input-panel {
+          background: rgba(235,234,229,0.03);
+          border-radius: 20px;
+          padding: 2rem;
+        }
+
+        /* Compact progress dots */
+        .builder-progress-compact {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .progress-dot {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          border: 2px solid rgba(235,234,229,0.15);
+          background: transparent;
+          color: rgba(235,234,229,0.55);
+          font-weight: 600;
+          font-size: 0.85rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-family: 'Poppins', sans-serif;
+        }
+
+        .progress-dot:disabled {
+          cursor: default;
+          opacity: 0.4;
+        }
+
+        .progress-dot.complete {
+          background: rgba(154,206,110,0.2);
+          border-color: #9ACE6E;
+          color: #9ACE6E;
+        }
+
+        .progress-dot.active {
+          background: #9ACE6E;
+          border-color: #9ACE6E;
+          color: #203E3C;
+          transform: scale(1.1);
+        }
+
+        .step-indicator {
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: rgba(235,234,229,0.55);
+          margin-bottom: 0.75rem;
+        }
+
+        .builder-question {
+          font-size: 1.75rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          line-height: 1.3;
+        }
+
+        .builder-hint {
+          font-size: 0.95rem;
+          color: rgba(235,234,229,0.6);
+          margin-bottom: 1.5rem;
+          line-height: 1.5;
+        }
+
+        .required-indicator {
+          color: #FFA69E;
+          font-size: 0.8rem;
+          margin-left: 0.5rem;
+        }
+
+        .validation-message {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-top: 0.75rem;
+          padding: 0.5rem 0.75rem;
+          background: rgba(255,166,158,0.1);
+          border-radius: 6px;
+          font-size: 0.85rem;
+          color: #FFA69E;
+        }
+
+        .validation-message.hidden {
+          display: none;
+        }
+
+        .builder-textarea {
+          width: 100%;
+          background: rgba(0,0,0,0.2);
+          border: 1px solid rgba(235,234,229,0.1);
+          border-radius: 12px;
+          padding: 1rem 1.25rem;
+          font-family: 'Poppins', sans-serif;
+          font-size: 1rem;
+          color: #EBEAE5;
+          resize: none;
+          min-height: 120px;
+          transition: all 0.2s ease;
+          line-height: 1.6;
+        }
+
+        .builder-textarea:focus {
+          outline: none;
+          border-color: #9ACE6E;
+          background: rgba(0,0,0,0.3);
+        }
+
+        .builder-textarea.invalid {
+          border-color: #FFA69E;
+        }
+
+        .builder-textarea.invalid:focus {
+          border-color: #FFA69E;
+        }
+
+        .builder-textarea::placeholder {
+          color: rgba(235,234,229,0.35);
+        }
+
+        .builder-examples {
+          margin-top: 1rem;
+        }
+
+        .examples-label {
+          font-size: 0.8rem;
+          color: rgba(235,234,229,0.55);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .examples-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-top: 0.75rem;
+        }
+
+        .example-chip {
+          background: rgba(235,234,229,0.05);
+          border: 1px solid rgba(235,234,229,0.1);
+          border-radius: 20px;
+          padding: 0.5rem 1rem;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.8rem;
+          color: rgba(235,234,229,0.7);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .example-chip:hover {
+          background: rgba(235,234,229,0.1);
+          border-color: rgba(235,234,229,0.2);
+          color: #EBEAE5;
+        }
+
+        /* Option chips */
+        .builder-chips {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          gap: 0.75rem;
+        }
+
+        .builder-chip {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 1rem;
+          background: rgba(0,0,0,0.15);
+          border: 2px solid rgba(235,234,229,0.08);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          font-family: 'Poppins', sans-serif;
+          text-align: left;
+        }
+
+        .builder-chip:hover {
+          background: rgba(0,0,0,0.25);
+          border-color: rgba(235,234,229,0.15);
+        }
+
+        .builder-chip.selected {
+          background: rgba(154,206,110,0.12);
+          border-color: #9ACE6E;
+        }
+
+        .chip-label {
+          font-weight: 600;
+          font-size: 0.95rem;
+          color: #EBEAE5;
+        }
+
+        .builder-chip.selected .chip-label {
+          color: #9ACE6E;
+        }
+
+        .chip-desc {
+          font-size: 0.8rem;
+          color: rgba(235,234,229,0.5);
+          margin-top: 0.2rem;
+        }
+
+        .builder-custom-input {
+          width: 100%;
+          margin-top: 1rem;
+          background: transparent;
+          border: 1px dashed rgba(235,234,229,0.2);
+          border-radius: 12px;
+          padding: 1rem;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.95rem;
+          color: #EBEAE5;
+          transition: all 0.2s ease;
+        }
+
+        .builder-custom-input:focus {
+          outline: none;
+          border-style: solid;
+          border-color: #9ACE6E;
+          background: rgba(0,0,0,0.1);
+        }
+
+        .builder-custom-input::placeholder {
+          color: rgba(235,234,229,0.35);
+        }
+
+        /* Navigation */
+        .builder-nav {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 2rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid rgba(235,234,229,0.08);
+        }
+
+        .builder-nav-right {
+          display: flex;
+          gap: 0.75rem;
+        }
+
+        .builder-nav-btn {
+          padding: 0.75rem 1.5rem;
+          border-radius: 10px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.95rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: none;
+        }
+
+        .builder-nav-btn.primary {
+          background: #9ACE6E;
+          color: #203E3C;
+        }
+
+        .builder-nav-btn.primary:hover {
+          background: #b5dc92;
+        }
+
+        .builder-nav-btn.primary:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        .builder-nav-btn.primary.generate {
+          background: linear-gradient(135deg, #9ACE6E 0%, #7ab85a 100%);
+        }
+
+        .builder-nav-btn.secondary {
+          background: rgba(235,234,229,0.08);
+          color: #EBEAE5;
+          border: 1px solid rgba(235,234,229,0.15);
+        }
+
+        .builder-nav-btn.secondary:hover {
+          background: rgba(235,234,229,0.12);
+        }
+
+        .builder-nav-btn.skip {
+          background: transparent;
+          color: rgba(235,234,229,0.5);
+        }
+
+        .builder-nav-btn.skip:hover {
+          color: #EBEAE5;
+        }
+
+        /* Live Preview Panel */
+        .builder-preview-panel {
+          background: rgba(0,0,0,0.3);
+          border-radius: 16px;
+          border: 1px solid rgba(235,234,229,0.08);
+          overflow: hidden;
+          position: sticky;
+          top: 2rem;
+        }
+
+        .preview-header {
+          padding: 0.75rem 1.25rem;
+          background: rgba(235,234,229,0.05);
+          border-bottom: 1px solid rgba(235,234,229,0.08);
+        }
+
+        .preview-label {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: rgba(235,234,229,0.6);
+        }
+
+        .preview-content {
+          padding: 1.25rem;
+          min-height: 200px;
+        }
+
+        .preview-empty {
+          color: rgba(235,234,229,0.5);
+          font-style: italic;
+          font-size: 0.95rem;
+        }
+
+        .preview-context {
+          color: #EBEAE5;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          margin-bottom: 1rem;
+        }
+
+        .preview-objective {
+          color: #EBEAE5;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          margin-bottom: 1rem;
+        }
+
+        .preview-qualifiers {
+          font-size: 0.85rem;
+          color: #9ACE6E;
+          padding-top: 0.75rem;
+          border-top: 1px dashed rgba(235,234,229,0.1);
+        }
+
+        /* Results View */
+        .builder-results {
+          max-width: 700px;
+          margin: 0 auto;
+          animation: fadeIn 0.4s ease;
+        }
+
+        .results-success {
+          text-align: center;
+          margin-bottom: 2rem;
+        }
+
+        .success-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 56px;
+          height: 56px;
+          background: #9ACE6E;
+          color: #203E3C;
+          border-radius: 50%;
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-bottom: 1rem;
+        }
+
+        .results-success h2 {
+          font-size: 1.75rem;
+          font-weight: 600;
+        }
+
+        .builder-prompt-card {
+          background: rgba(0,0,0,0.3);
+          border: 1px solid rgba(235,234,229,0.1);
+          border-radius: 16px;
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .builder-prompt-text {
+          font-family: 'Poppins', sans-serif;
+          font-size: 1rem;
+          line-height: 1.7;
+          color: #EBEAE5;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          margin-bottom: 1.25rem;
+        }
+
+        .builder-copy-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem 1.5rem;
+          background: #9ACE6E;
+          color: #203E3C;
+          border: 2px solid transparent;
+          border-radius: 8px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.9rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          min-width: 160px;
+          justify-content: center;
+        }
+
+        .builder-copy-btn:hover:not(:disabled) {
+          background: #b5dc92;
+        }
+
+        .builder-copy-btn:disabled {
+          cursor: wait;
+          opacity: 0.8;
+        }
+
+        .builder-copy-btn.copying {
+          background: rgba(154,206,110,0.3);
+          color: #9ACE6E;
+          border-color: #9ACE6E;
+        }
+
+        .builder-copy-btn.copied {
+          background: transparent;
+          color: #9ACE6E;
+          border-color: #9ACE6E;
+        }
+
+        .builder-copy-btn.error {
+          background: rgba(255,166,158,0.2);
+          color: #FFA69E;
+          border-color: #FFA69E;
+        }
+
+        /* Next steps */
+        .results-next {
+          background: rgba(235,234,229,0.03);
+          border-radius: 16px;
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .next-label {
+          font-size: 0.9rem;
+          color: rgba(235,234,229,0.6);
+          margin-bottom: 1rem;
+        }
+
+        .next-options {
+          display: flex;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+
+        .next-option {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 1rem;
+          background: rgba(0,0,0,0.2);
+          border: 1px solid rgba(235,234,229,0.1);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-align: left;
+          font-family: 'Poppins', sans-serif;
+        }
+
+        .next-option:hover {
+          background: rgba(0,0,0,0.3);
+          border-color: rgba(235,234,229,0.2);
+        }
+
+        .option-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1rem;
+          font-weight: 700;
+          flex-shrink: 0;
+        }
+
+        .option-text {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .option-text strong {
+          color: #EBEAE5;
+          font-size: 0.95rem;
+        }
+
+        .option-text small {
+          color: rgba(235,234,229,0.5);
+          font-size: 0.8rem;
+        }
+
+        .help-choose-link {
+          display: block;
+          width: 100%;
+          text-align: center;
+          background: transparent;
+          border: none;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.9rem;
+          color: rgba(235,234,229,0.5);
+          cursor: pointer;
+          padding: 0.5rem;
+          transition: color 0.2s ease;
+        }
+
+        .help-choose-link:hover {
+          color: #9ACE6E;
+        }
+
+        .results-actions {
+          display: flex;
+          justify-content: center;
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+
+        .costar-credit {
+          text-align: center;
+          font-size: 0.8rem;
+          color: rgba(235,234,229,0.55);
+        }
+
+        .costar-credit strong {
+          color: #9ACE6E;
+        }
+
+        /* Accent button for home */
+        .btn-accent {
+          background: linear-gradient(135deg, #9ACE6E 0%, #7ab85a 100%);
+          color: #203E3C;
+          border: none;
+        }
+
+        .btn-accent:hover {
+          background: linear-gradient(135deg, #b5dc92 0%, #9ACE6E 100%);
+        }
+
+        @media (max-width: 1024px) {
+          .home-layout {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+          }
+          .tools-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+          .builder-layout { grid-template-columns: 1fr; }
+          .builder-preview-panel { 
+            position: static;
+            margin-top: 1.5rem;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .topbar, .main, .footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+          .home-primary-actions { gap: 0.75rem; }
+          .btn-large { padding: 1rem 1.25rem; }
+          .btn-large .btn-icon { font-size: 1.25rem; }
+          .btn-large .btn-content strong { font-size: 0.95rem; }
+          .btn-large .btn-content small { font-size: 0.75rem; }
+          .home-secondary-actions { justify-content: center; }
+          .tools-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+          .tool-card { padding: 1rem 0.75rem; }
+          .tool-card-icon { width: 40px; height: 40px; font-size: 1rem; }
+          .tool-card-name { font-size: 0.85rem; }
+          .tool-card-tagline { font-size: 0.7rem; }
+          .flow-card { padding: 2rem 1.5rem; }
+          .flow-binary { flex-direction: column; }
+          .flow-step { width: 36px; height: 36px; font-size: 0.85rem; }
+          .flow-connector { width: 24px; }
+          .result-card { padding: 2rem 1.5rem; }
+          .result-tool { flex-direction: column; text-align: center; }
+          .result-tool-info { text-align: center; }
+          .result-actions { flex-direction: column; }
+          .result-actions .btn { width: 100%; }
+          .alternatives-grid { gap: 0.5rem; }
+          .search-view { padding: 1.5rem; }
+          .search-input { font-size: 1.25rem; padding-left: 2.5rem; }
+          .profile-hero { flex-direction: column; text-align: center; }
+          .profile-title h1 { font-size: 1.75rem; }
+          .profile-quick-actions { flex-direction: column; }
+          .profile-quick-actions .btn { width: 100%; justify-content: center; }
+          .profile-nav-tools { display: none; }
+          .footer-inner { flex-direction: column; text-align: center; }
+          .footer-reminders { justify-content: center; }
+          .glossary-header { flex-direction: column; }
+          .glossary-category-info { gap: 1rem; }
+          .glossary-category-number { width: 32px; height: 32px; font-size: 0.85rem; }
+          .topbar-right { gap: 1rem; }
+          .topbar-link { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
+          .compare-header { flex-direction: column; }
+          .compare-table { font-size: 0.8rem; }
+          .compare-table th, .compare-table td { padding: 0.75rem 0.5rem; }
+          .compare-legend { gap: 1rem; font-size: 0.75rem; }
+          .tiers-grid { grid-template-columns: 1fr; }
+          .builder-layout { grid-template-columns: 1fr; }
+          .builder-preview-panel { display: none; }
+          .builder-question { font-size: 1.35rem; }
+          .builder-chips { grid-template-columns: 1fr; }
+          .builder-nav { flex-direction: column; gap: 0.75rem; }
+          .builder-nav-right { width: 100%; justify-content: space-between; }
+          .builder-nav-btn { flex: 1; text-align: center; }
+          .next-options { flex-direction: column; }
+          .results-actions { flex-direction: column; }
+          .results-actions .builder-nav-btn { width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+          .tools-grid { grid-template-columns: 1fr 1fr; }
+          .tool-card-tagline { display: none; }
+          .home-secondary-actions { flex-direction: column; gap: 0; }
+          .btn-text { width: 100%; justify-content: center; }
+          .flow-question { font-size: 1.25rem; }
+          .alternative-chip { padding: 0.5rem 0.75rem; }
+          .alt-name { font-size: 0.8rem; }
+        }
+      `}</style>
+
+      <div className="blob blob-1"></div>
+      <div className="blob blob-2"></div>
+      <div className="blob blob-3"></div>
+
+      <div className="container">
+        <a href="#main-content" className="skip-link">Skip to main content</a>
+        <header className="topbar">
+          <span className="topbar-brand">Mornington Peninsula Shire</span>
+          <div className="topbar-right">
+            <button 
+              className="topbar-link"
+              onClick={() => setView('glossary')}
+              aria-label="Learn AI basics and terminology"
+            >
+              New to AI?
+            </button>
+            <span className="topbar-version">v3.0</span>
+          </div>
+        </header>
+
+        <main className="main" id="main-content" tabIndex="-1">
+          {view === 'home' && (
+            <div className="home-layout">
+              <div className="home-left">
+                <h1>
+                  Good {greeting}.<br/>
+                  <strong>Which AI tool?</strong>
+                </h1>
+                <p className="home-subtitle">
+                  Not all AI tools are equal. Find the right one for your task.
+                </p>
+                
+                <div className="home-primary-actions">
+                  <button className="btn btn-primary btn-large" onClick={() => setView('flow')}>
+                    <span className="btn-icon">?</span>
+                    <span className="btn-content">
+                      <strong>Help me choose</strong>
+                      <small>Answer a few questions to find the right tool</small>
+                    </span>
+                    <span className="btn-arrow">→</span>
+                  </button>
+                  
+                  <button className="btn btn-accent btn-large" onClick={openBuilder}>
+                    <span className="btn-icon">+</span>
+                    <span className="btn-content">
+                      <strong>Build a prompt</strong>
+                      <small>Craft an effective prompt step by step</small>
+                    </span>
+                    <span className="btn-arrow">→</span>
+                  </button>
+                </div>
+
+                <div className="home-secondary-actions">
+                  <button className="btn-text" onClick={() => setView('search')}>
+                    Search by task
+                  </button>
+                  <button className="btn-text" onClick={() => setView('reference')}>
+                    Quick reference
+                  </button>
+                  <button className="btn-text" onClick={() => setView('compare')}>
+                    Compare tools
+                  </button>
+                </div>
+              </div>
+
+              <div className="tools-grid-section">
+                <p className="tools-grid-label" id="tools-grid-label">Your approved tools</p>
+                <div className="tools-grid" role="list" aria-labelledby="tools-grid-label">
+                  {Object.entries(tools).map(([key, tool]) => (
+                    <button
+                      key={key}
+                      className={`tool-card ${tool.isProtected ? 'protected' : ''}`}
+                      onClick={() => openToolProfile(key)}
+                      style={{ '--tool-color': tool.color, '--tool-dark': tool.dark }}
+                      role="listitem"
+                      aria-label={`${tool.name}: ${tool.tagline}${tool.isProtected ? ' (Enterprise Protected)' : ''}`}
+                    >
+                      <div className="tool-card-header">
+                        <span className="tool-card-icon" style={{ background: tool.color, color: tool.dark }} aria-hidden="true">
+                          {tool.name.charAt(0)}
+                        </span>
+                        {tool.isProtected && <span className="tool-protected-badge" aria-label="Enterprise protected">P</span>}
+                      </div>
+                      <span className="tool-card-name">{tool.name}</span>
+                      <span className="tool-card-tagline">{tool.tagline}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {view === 'tool-profile' && selectedTool && (
+            <div className="profile-view">
+              <div className="profile-nav">
+                <button className="profile-back-btn" onClick={() => setView('home')}>
+                  ← Back to tools
+                </button>
+                <div className="profile-nav-tools">
+                  {Object.entries(tools).filter(([key]) => key !== selectedTool).slice(0, 4).map(([key, tool]) => (
+                    <button
+                      key={key}
+                      className="profile-nav-tool"
+                      onClick={() => setSelectedTool(key)}
+                      style={{ background: tool.color, color: tool.dark }}
+                      title={tool.name}
+                    >
+                      {tool.name.charAt(0)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="profile-hero">
+                <div className="profile-icon" style={{ background: tools[selectedTool].color, color: tools[selectedTool].dark }}>
+                  <span>{tools[selectedTool].name.charAt(0)}</span>
+                </div>
+                <div className="profile-title">
+                  <h1>{tools[selectedTool].name}</h1>
+                  <p className="profile-tagline">{tools[selectedTool].tagline}</p>
+                  {tools[selectedTool].isProtected && (
+                    <span className="profile-protected-inline">
+                      Enterprise Protected
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <p className="profile-description">{tools[selectedTool].description}</p>
+
+              {/* Quick actions */}
+              <div className="profile-quick-actions">
+                <button className="btn btn-primary" onClick={openBuilder}>
+                  Build a prompt for {tools[selectedTool].name}
+                  <span className="btn-arrow">→</span>
+                </button>
+                <button className="btn btn-secondary" onClick={() => setView('compare')}>
+                  Compare with other tools
+                </button>
+              </div>
+
+              {/* Tiers Section */}
+              {tools[selectedTool].tiers && (
+                <div className="profile-tiers">
+                  <h3 className="section-title">Subscription Tiers</h3>
+                  <div className="tiers-grid">
+                    {tools[selectedTool].tiers.map((tier, i) => (
+                      <div key={i} className={`tier-card ${i === 0 ? 'free' : ''}`}>
+                        <div className="tier-header">
+                          <span className="tier-name">{tier.name}</span>
+                          <span className="tier-price">{tier.price}</span>
+                        </div>
+                        <p className="tier-features">{tier.features}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Key Features Section */}
+              {tools[selectedTool].keyFeatures && (
+                <div className="profile-features">
+                  <h3 className="section-title">Key Features</h3>
+                  <div className="features-list">
+                    {tools[selectedTool].keyFeatures.map((feature, i) => (
+                      <div key={i} className="feature-item">
+                        <span className="feature-check">✓</span>
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="profile-grid">
+                <div className="profile-card">
+                  <h3>Available Models</h3>
+                  <ul>
+                    {tools[selectedTool].models.map((model, i) => (
+                      <li key={i} className="model-item">
+                        <span className="model-name">{model.name}</span>
+                        <span className="model-desc">{model.desc}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="profile-card highlight">
+                  <h3>Best For</h3>
+                  <ul>
+                    {tools[selectedTool].bestFor.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="profile-card">
+                  <h3>Tips for Use</h3>
+                  <ul>
+                    {tools[selectedTool].tips.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="profile-card caution">
+                  <h3>Limitations</h3>
+                  <ul>
+                    {tools[selectedTool].limitations.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {toolTasks.length > 0 && (
+                <div className="profile-tasks">
+                  <h3>Recommended Tasks</h3>
+                  <div className="task-chips">
+                    {toolTasks.map((task, i) => (
+                      <span key={i} className="task-chip">{task.task}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {view === 'search' && (
+            <div className="search-view">
+              <div className="search-header">
+                <button className="search-back" onClick={() => { setView('home'); setSearchQuery(''); }}>
+                  ← Back
+                </button>
+                <button className="search-close" onClick={() => { setView('home'); setSearchQuery(''); }}>×</button>
+              </div>
+              <div className="search-input-wrap">
+                <span className="search-icon" aria-hidden="true"></span>
+                <input
+                  className="search-input"
+                  type="text"
+                  placeholder="What do you need to do?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                  aria-label="Search for tasks"
+                />
+                {searchQuery && (
+                  <button className="search-clear" onClick={() => setSearchQuery('')}>×</button>
+                )}
+              </div>
+              <div className="search-results">
+                {searchQuery.length < 2 && (
+                  <div className="search-suggestions">
+                    <p className="suggestions-label">Popular tasks</p>
+                    <div className="suggestions-grid">
+                      {suggestedTasks.map((task, i) => {
+                        const taskItem = taskData.find(t => t.task === task);
+                        return (
+                          <button
+                            key={i}
+                            className="suggestion-chip"
+                            onClick={() => taskItem && openToolProfile(taskItem.tool)}
+                          >
+                            <span className="suggestion-task">{task}</span>
+                            {taskItem && (
+                              <span 
+                                className="suggestion-tool"
+                                style={{ background: tools[taskItem.tool].color, color: tools[taskItem.tool].dark }}
+                              >
+                                {tools[taskItem.tool].name}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {searchQuery.length >= 2 && searchResults.length > 0 && (
+                  <div className="search-results-list">
+                    <p className="results-count">{searchResults.length} task{searchResults.length !== 1 ? 's' : ''} found</p>
+                    {searchResults.map((item, i) => (
+                      <button key={i} className="search-result" onClick={() => openToolProfile(item.tool)}>
+                        <span className="search-result-task">{item.task}</span>
+                        <span 
+                          className="search-result-tool"
+                          style={{ background: tools[item.tool].color, color: tools[item.tool].dark }}
+                        >
+                          {tools[item.tool].name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {searchQuery.length >= 2 && searchResults.length === 0 && (
+                  <div className="search-empty" role="status" aria-live="polite">
+                    <span className="empty-icon">?</span>
+                    <p className="empty-title">No matching tasks</p>
+                    <p className="empty-hint">Try different keywords, or use the wizard to find the right tool</p>
+                    <button className="btn btn-secondary" onClick={() => { setView('flow'); setSearchQuery(''); }}>
+                      Help me choose →
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {view === 'flow' && !result && currentQuestion && (
+            <div className="flow-view">
+              <button className="flow-back-top" onClick={resetFlow}>
+                ← Back to home
+              </button>
+              
+              <div className="flow-card">
+                <div className="flow-progress">
+                  <div className={`flow-step ${flowStep === 'sensitive' ? 'active' : flowStep !== 'sensitive' ? 'complete' : ''}`}>
+                    <span>1</span>
+                  </div>
+                  <div className="flow-connector"></div>
+                  <div className={`flow-step ${flowStep !== 'sensitive' && flowStep !== 'task-type' ? 'complete' : flowStep === 'task-type' ? 'active' : ''}`}>
+                    <span>2</span>
+                  </div>
+                  <div className="flow-connector"></div>
+                  <div className={`flow-step ${flowStep !== 'sensitive' && flowStep !== 'task-type' ? 'active' : ''}`}>
+                    <span>3</span>
+                  </div>
+                </div>
+                
+                <h2 className="flow-question">{currentQuestion.text}</h2>
+                
+                {currentQuestion.yes && currentQuestion.no ? (
+                  <div className="flow-options flow-binary" role="group" aria-label="Choose yes or no">
+                    <button 
+                      className="flow-option yes" 
+                      onClick={() => handleFlowAnswer(currentQuestion.yes)}
+                      aria-label="Yes, this involves sensitive information"
+                    >
+                      <span className="flow-option-icon" aria-hidden="true">Yes</span>
+                    </button>
+                    <button 
+                      className="flow-option no" 
+                      onClick={() => handleFlowAnswer(currentQuestion.no)}
+                      aria-label="No, this does not involve sensitive information"
+                    >
+                      <span className="flow-option-icon" aria-hidden="true">No</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flow-options" role="group" aria-label="Task type options">
+                    {currentQuestion.options.map((opt, i) => (
+                      <button 
+                        key={i} 
+                        className="flow-option" 
+                        onClick={() => handleFlowAnswer(opt)}
+                      >
+                        {opt.label}
+                        <span className="flow-option-arrow" aria-hidden="true">→</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {(view === 'flow' || view === 'result') && result && (
+            <div className="result-view" role="region" aria-label="Tool recommendation">
+              <button className="flow-back-top" onClick={resetFlow}>
+                ← Start over
+              </button>
+              
+              <div className="result-card">
+                <div className="result-badge" aria-label="Recommended tool">
+                  <span aria-hidden="true">✓</span> Recommended
+                </div>
+                <button 
+                  className="result-tool" 
+                  style={{ background: tools[result].color, color: tools[result].dark }}
+                  onClick={() => openToolProfile(result)}
+                  aria-label={`View ${tools[result].name} profile`}
+                >
+                  <span className="result-tool-icon" aria-hidden="true">{tools[result].name.charAt(0)}</span>
+                  <div className="result-tool-info">
+                    <span className="result-tool-name">{tools[result].name}</span>
+                    <span className="result-tool-tagline">{tools[result].tagline}</span>
+                  </div>
+                </button>
+                
+                <p className="result-reason">
+                  {result === 'copilot' && 'Copilot Chat keeps your data protected. Use it for anything involving sensitive, personal, or confidential information.'}
+                  {result === 'claude' && 'Claude excels at thorough analysis, complex documents, and nuanced writing. Great for policy work and detailed reasoning.'}
+                  {result === 'chatgpt' && 'ChatGPT is fast, creative, and conversational. Perfect for brainstorming, quick drafts, and generating ideas.'}
+                  {result === 'perplexity' && 'Perplexity specialises in research with real-time sources and citations. Ideal for fact-checking and current information.'}
+                  {result === 'gemini' && 'Gemini integrates deeply with Google services. Great for research with Deep Think and multimodal tasks.'}
+                </p>
+
+                <div className="result-actions">
+                  <button 
+                    className="btn btn-primary"
+                    onClick={() => openToolProfile(result)}
+                  >
+                    View {tools[result].name} guide
+                    <span className="btn-arrow">→</span>
+                  </button>
+                  <button 
+                    className="btn btn-secondary"
+                    onClick={openBuilder}
+                  >
+                    Build a prompt
+                  </button>
+                </div>
+              </div>
+
+              <div className="result-alternatives">
+                <p className="alternatives-label">Other options</p>
+                <div className="alternatives-grid">
+                  {Object.entries(tools)
+                    .filter(([key]) => key !== result)
+                    .slice(0, 4)
+                    .map(([key, tool]) => (
+                      <button
+                        key={key}
+                        className="alternative-chip"
+                        onClick={() => openToolProfile(key)}
+                      >
+                        <span className="alt-icon" style={{ background: tool.color, color: tool.dark }}>
+                          {tool.name.charAt(0)}
+                        </span>
+                        <span className="alt-name">{tool.name}</span>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {view === 'reference' && (
+            <div className="reference-view">
+              <div className="reference-header">
+                <h2>Quick <strong>reference</strong></h2>
+                <button className="btn btn-secondary" onClick={() => setView('home')}>← Back</button>
+              </div>
+              <div className="reference-grid">
+                {taskData.map((item, i) => (
+                  <div key={i} className="ref-card" onClick={() => openToolProfile(item.tool)}>
+                    <p className="ref-card-task">{item.task}</p>
+                    <span 
+                      className="ref-card-tool"
+                      style={{ background: tools[item.tool].color, color: tools[item.tool].dark }}
+                    >
+                      {tools[item.tool].name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {view === 'compare' && (
+            <div className="compare-view">
+              <div className="compare-header">
+                <div className="compare-title-section">
+                  <h2>Compare <strong>Tools</strong></h2>
+                  <p className="compare-subtitle">Feature comparison across all five approved AI tools</p>
+                </div>
+                <button className="btn btn-secondary" onClick={() => setView('home')}>← Back</button>
+              </div>
+
+              <div className="compare-table-wrapper">
+                <table className="compare-table">
+                  <thead>
+                    <tr>
+                      <th className="compare-feature-col">Feature</th>
+                      {Object.entries(tools).map(([key, tool]) => (
+                        <th key={key} className="compare-tool-col">
+                          <button 
+                            className="compare-tool-header"
+                            onClick={() => openToolProfile(key)}
+                            style={{ color: tool.color }}
+                          >
+                            {tool.name}
+                          </button>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {comparisonFeatures.map((row, i) => (
+                      <tr key={i}>
+                        <td className="compare-feature-name">{row.feature}</td>
+                        {['chatgpt', 'claude', 'perplexity', 'gemini', 'copilot'].map(toolKey => {
+                          const value = row[toolKey];
+                          let display, className;
+                          if (value === true) {
+                            display = '✓';
+                            className = 'compare-yes';
+                          } else if (value === false) {
+                            display = '—';
+                            className = 'compare-no';
+                          } else {
+                            display = value;
+                            className = 'compare-partial';
+                          }
+                          return (
+                            <td key={toolKey} className={className}>{display}</td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="compare-legend">
+                <span><span className="legend-yes">✓</span> Full support</span>
+                <span><span className="legend-partial">paid</span> Requires subscription</span>
+                <span><span className="legend-no">—</span> Not available</span>
+              </div>
+
+              <div className="compare-note">
+                <p>Click any tool name to view its full profile. Feature availability may vary by subscription tier.</p>
+              </div>
+            </div>
+          )}
+
+          {view === 'builder' && (
+            <div className="builder-view">
+              {builderStep < costarSteps.length ? (
+                <div className="builder-layout">
+                  {/* Left side - Input */}
+                  <div className="builder-input-panel">
+                    {/* Compact progress */}
+                    <nav className="builder-progress-compact" aria-label="Prompt builder progress">
+                      {costarSteps.map((step, i) => (
+                        <button 
+                          key={step.id}
+                          className={`progress-dot ${i === builderStep ? 'active' : ''} ${i < builderStep ? 'complete' : ''}`}
+                          onClick={() => i <= builderStep && setBuilderStep(i)}
+                          disabled={i > builderStep}
+                          title={step.name}
+                          aria-label={`Step ${i + 1}: ${step.name}${i < builderStep ? ' (completed)' : i === builderStep ? ' (current)' : ''}`}
+                          aria-current={i === builderStep ? 'step' : undefined}
+                        >
+                          {step.letter}
+                        </button>
+                      ))}
+                    </nav>
+
+                    {/* Current step */}
+                    {(() => {
+                      const step = costarSteps[builderStep];
+                      return (
+                        <div className="builder-step" key={step.id} role="form" aria-label={`Step ${builderStep + 1}: ${step.name}`}>
+                          <div className="step-indicator" aria-hidden="true">
+                            Step {builderStep + 1} of 6
+                          </div>
+                          
+                          <h2 className="builder-question" id="builder-question">
+                            {step.question}
+                            {(step.id === 'context' || step.id === 'objective') && (
+                              <span className="required-indicator">*Required</span>
+                            )}
+                          </h2>
+                          <p className="builder-hint" id="builder-hint">{step.description}</p>
+
+                          {/* Text input for context and objective */}
+                          {(step.id === 'context' || step.id === 'objective') && (
+                            <div className="builder-input-area">
+                              <textarea
+                                className={showValidation && !builderData[step.id].trim() ? 'builder-textarea invalid' : 'builder-textarea'}
+                                placeholder={step.placeholder}
+                                value={builderData[step.id]}
+                                onChange={(e) => {
+                                  updateBuilderField(step.id, e.target.value);
+                                  if (showValidation && e.target.value.trim()) {
+                                    setShowValidation(false);
+                                  }
+                                }}
+                                rows={4}
+                                autoFocus
+                                aria-labelledby="builder-question"
+                                aria-describedby="builder-hint"
+                                aria-required="true"
+                                aria-invalid={showValidation && !builderData[step.id].trim()}
+                              />
+                              {showValidation && !builderData[step.id].trim() && (
+                                <div className="validation-message" role="alert">
+                                  Please provide {step.id === 'context' ? 'some context' : 'an objective'} to continue
+                                </div>
+                              )}
+                              <div className="builder-examples">
+                                <span className="examples-label">Try an example:</span>
+                                <div className="examples-list">
+                                  {step.examples.map((ex, i) => (
+                                    <button 
+                                      key={i}
+                                      className="example-chip"
+                                      onClick={() => updateBuilderField(step.id, ex)}
+                                    >
+                                      {ex.length > 60 ? ex.substring(0, 60) + '...' : ex}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Option chips for style, tone, audience, response */}
+                          {step.options && (
+                            <div className="builder-options-area">
+                              <div className="builder-chips" role="listbox" aria-label={`Select ${step.name}`}>
+                                {step.options.map(option => (
+                                  <button
+                                    key={option.value}
+                                    className={`builder-chip ${builderData[step.id] === option.value ? 'selected' : ''}`}
+                                    onClick={() => {
+                                      updateBuilderField(step.id, option.value);
+                                      updateBuilderField(`${step.id}Custom`, '');
+                                    }}
+                                    role="option"
+                                    aria-selected={builderData[step.id] === option.value}
+                                  >
+                                    <span className="chip-label">{option.label}</span>
+                                    <span className="chip-desc">{option.desc}</span>
+                                  </button>
+                                ))}
+                              </div>
+                              {step.allowCustom && (
+                                <input
+                                  type="text"
+                                  className="builder-custom-input"
+                                  placeholder={step.customPlaceholder}
+                                  value={builderData[`${step.id}Custom`] || ''}
+                                  onChange={(e) => {
+                                    updateBuilderField(`${step.id}Custom`, e.target.value);
+                                    if (e.target.value) updateBuilderField(step.id, '');
+                                  }}
+                                  aria-label={`Custom ${step.name}`}
+                                />
+                              )}
+                            </div>
+                          )}
+
+                          {/* Navigation */}
+                          <div className="builder-nav">
+                            <button 
+                              className="builder-nav-btn secondary"
+                              onClick={() => builderStep > 0 ? setBuilderStep(builderStep - 1) : (resetBuilder(), setView('home'))}
+                            >
+                              {builderStep > 0 ? '← Back' : '← Cancel'}
+                            </button>
+                            
+                            <div className="builder-nav-right">
+                              {step.options && (
+                                <button 
+                                  className="builder-nav-btn skip"
+                                  onClick={() => {
+                                    if (builderStep < costarSteps.length - 1) {
+                                      setBuilderStep(builderStep + 1);
+                                    } else {
+                                      generatePrompt();
+                                    }
+                                  }}
+                                >
+                                  Skip
+                                </button>
+                              )}
+                              
+                              {builderStep < costarSteps.length - 1 ? (
+                                <button 
+                                  className="builder-nav-btn primary"
+                                  onClick={handleBuilderNext}
+                                >
+                                  Next →
+                                </button>
+                              ) : (
+                                <button 
+                                  className="builder-nav-btn primary generate"
+                                  onClick={generatePrompt}
+                                >
+                                  Generate prompt
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Right side - Live Preview */}
+                  <div className="builder-preview-panel">
+                    <div className="preview-header">
+                      <span className="preview-label">Live preview</span>
+                    </div>
+                    <div className="preview-content">
+                      {builderData.context || builderData.objective ? (
+                        <>
+                          {builderData.context && (
+                            <p className="preview-context">{builderData.context}</p>
+                          )}
+                          {builderData.objective && (
+                            <p className="preview-objective">{builderData.objective}</p>
+                          )}
+                          {(getBuilderValue('style') || getBuilderValue('tone') || getBuilderValue('audience') || getBuilderValue('response')) && (
+                            <p className="preview-qualifiers">
+                              {[
+                                getBuilderValue('style') && getBuilderValue('tone') 
+                                  ? `${getBuilderValue('style')}, ${getBuilderValue('tone')} tone`
+                                  : getBuilderValue('style') 
+                                    ? `${getBuilderValue('style')} style`
+                                    : getBuilderValue('tone') 
+                                      ? `${getBuilderValue('tone')} tone`
+                                      : null,
+                                getBuilderValue('audience') && `for ${getBuilderValue('audience')}`,
+                                getBuilderValue('response') && `as ${getBuilderValue('response')}`
+                              ].filter(Boolean).join(' · ')}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="preview-empty">Your prompt will appear here as you build it...</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Results view */
+                <div className="builder-results">
+                  <div className="results-success">
+                    <span className="success-icon">✓</span>
+                    <h2>Prompt ready</h2>
+                  </div>
+
+                  <div className="builder-prompt-card">
+                    <pre className="builder-prompt-text">{generatedPrompt}</pre>
+                    <button 
+                      className={`builder-copy-btn ${copyStatus}`}
+                      onClick={copyPrompt}
+                      disabled={copyStatus === 'copying'}
+                      aria-live="polite"
+                    >
+                      {copyStatus === 'idle' && 'Copy to clipboard'}
+                      {copyStatus === 'copying' && 'Copying...'}
+                      {copyStatus === 'copied' && 'Copied!'}
+                      {copyStatus === 'error' && 'Failed to copy'}
+                    </button>
+                  </div>
+
+                  <div className="results-next">
+                    <p className="next-label">Where to use this prompt:</p>
+                    <div className="next-options">
+                      <button className="next-option" onClick={() => openToolProfile('copilot')}>
+                        <span className="option-icon" style={{ background: '#FFA69E', color: '#4E4348' }}>C</span>
+                        <span className="option-text">
+                          <strong>Copilot Chat</strong>
+                          <small>Best for sensitive/confidential content</small>
+                        </span>
+                      </button>
+                      <button className="next-option" onClick={() => openToolProfile('chatgpt')}>
+                        <span className="option-icon" style={{ background: '#9ACE6E', color: '#43491D' }}>C</span>
+                        <span className="option-text">
+                          <strong>ChatGPT</strong>
+                          <small>Quick drafts, creative content</small>
+                        </span>
+                      </button>
+                      <button className="next-option" onClick={() => openToolProfile('claude')}>
+                        <span className="option-icon" style={{ background: '#8CB3FF', color: '#1E4371' }}>C</span>
+                        <span className="option-text">
+                          <strong>Claude</strong>
+                          <small>Complex documents, analysis</small>
+                        </span>
+                      </button>
+                    </div>
+                    <button className="help-choose-link" onClick={() => setView('flow')}>
+                      Not sure? Let me help you choose →
+                    </button>
+                  </div>
+
+                  <div className="results-actions">
+                    <button className="builder-nav-btn secondary" onClick={() => setBuilderStep(0)}>
+                      ← Edit prompt
+                    </button>
+                    <button className="builder-nav-btn secondary" onClick={resetBuilder}>
+                      Start new prompt
+                    </button>
+                    <button className="builder-nav-btn primary" onClick={() => { resetBuilder(); setView('home'); }}>
+                      Done
+                    </button>
+                  </div>
+
+                  <p className="costar-credit">
+                    Built with the <strong>CO-STAR</strong> framework from GovTech Singapore
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {view === 'glossary' && (
+            <div className="glossary-view">
+              <div className="glossary-header">
+                <div className="glossary-title-section">
+                  <h2>AI <strong>Glossary</strong></h2>
+                  <p className="glossary-subtitle">Plain-language explanations of common AI terms</p>
+                </div>
+                <button className="btn btn-secondary" onClick={() => setView('home')}>← Back</button>
+              </div>
+
+              <div className="glossary-intro">
+                <p>New to AI tools? This glossary explains the terminology you'll encounter without the jargon. Click any category to explore.</p>
+              </div>
+
+              <div className="glossary-categories">
+                {glossaryData.map((category, catIndex) => (
+                  <div 
+                    key={catIndex} 
+                    className={`glossary-category ${expandedGlossaryCategory === catIndex ? 'expanded' : ''}`}
+                  >
+                    <button
+                      className="glossary-category-header"
+                      onClick={() => setExpandedGlossaryCategory(expandedGlossaryCategory === catIndex ? null : catIndex)}
+                      aria-expanded={expandedGlossaryCategory === catIndex}
+                    >
+                      <div className="glossary-category-info">
+                        <span className="glossary-category-number">{catIndex + 1}</span>
+                        <div>
+                          <h3>{category.category}</h3>
+                          <p>{category.description}</p>
+                        </div>
+                      </div>
+                      <span className="glossary-expand-icon">
+                        {expandedGlossaryCategory === catIndex ? '−' : '+'}
+                      </span>
+                    </button>
+                    
+                    {expandedGlossaryCategory === catIndex && (
+                      <div className="glossary-terms">
+                        {category.terms.map((item, termIndex) => (
+                          <div key={termIndex} className="glossary-term">
+                            <dt>{item.term}</dt>
+                            <dd>{item.definition}</dd>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="glossary-footer-note">
+                <p>Still have questions? Contact Justin Daly or join the AI Pioneer Network to learn from colleagues.</p>
+              </div>
+            </div>
+          )}
+        </main>
+
+        {(view === 'home' || view === 'reference' || view === 'tool-profile' || view === 'glossary' || view === 'compare' || view === 'builder') && (
+          <footer className="footer">
+            <div className="footer-inner">
+              <div className="footer-reminders">
+                <div className="reminder-item">
+                  <span className="reminder-dot"></span>
+                  <span>Never put sensitive data in public AI tools</span>
+                </div>
+                <div className="reminder-item">
+                  <span className="reminder-dot"></span>
+                  <span>Always validate AI outputs</span>
+                </div>
+                <div className="reminder-item">
+                  <span className="reminder-dot"></span>
+                  <span>AI assists—you decide</span>
+                </div>
+                <div className="reminder-item">
+                  <span className="reminder-dot"></span>
+                  <span>Disclose significant AI use</span>
+                </div>
+              </div>
+              <div className="footer-contact">
+                Questions? Please contact Justin Daly
+              </div>
+            </div>
+          </footer>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Render the app
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<GenAIToolGuide />);
+  </script>
+</body>
+</html>

@@ -563,17 +563,21 @@ function GenAIToolGuide() {
   const [selectedTool, setSelectedTool] = useState(null);
   const [expandedGlossaryCategory, setExpandedGlossaryCategory] = useState(null);
   const [builderStep, setBuilderStep] = useState(0);
-  const [builderData, setBuilderData] = useState({
-    context: '',
-    objective: '',
-    style: '',
-    styleCustom: '',
-    tone: '',
-    toneCustom: '',
-    audience: '',
-    audienceCustom: '',
-    response: '',
-    responseCustom: ''
+  const [builderData, setBuilderData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('genai-builder-data');
+      return saved ? JSON.parse(saved) : {
+        context: '', objective: '', style: '', styleCustom: '',
+        tone: '', toneCustom: '', audience: '', audienceCustom: '',
+        response: '', responseCustom: ''
+      };
+    } catch {
+      return {
+        context: '', objective: '', style: '', styleCustom: '',
+        tone: '', toneCustom: '', audience: '', audienceCustom: '',
+        response: '', responseCustom: ''
+      };
+    }
   });
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [copyStatus, setCopyStatus] = useState('idle'); // idle, copying, copied, error
@@ -584,6 +588,11 @@ function GenAIToolGuide() {
     const timer = setInterval(() => setTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
+
+  // Persist prompt builder data across reloads
+  useEffect(() => {
+    try { localStorage.setItem('genai-builder-data', JSON.stringify(builderData)); } catch {}
+  }, [builderData]);
 
   // Simple stemming - removes common suffixes to match related words
   const stem = (word) => {
@@ -670,6 +679,7 @@ function GenAIToolGuide() {
 
   // Prompt Builder Functions
   const resetBuilder = () => {
+    try { localStorage.removeItem('genai-builder-data'); } catch {}
     setBuilderStep(0);
     setBuilderData({
       context: '',

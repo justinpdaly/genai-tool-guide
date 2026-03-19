@@ -1197,21 +1197,6 @@ function GenAIToolGuide() {
           font-size: 1.25rem;
         }
 
-        .tool-protected-badge {
-          position: absolute;
-          top: -4px;
-          right: -8px;
-          width: 18px;
-          height: 18px;
-          background: #FFA69E;
-          color: #4E4348;
-          border-radius: 50%;
-          font-size: 0.65rem;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
 
         .tool-card-name {
           font-weight: 600;
@@ -3255,7 +3240,6 @@ function GenAIToolGuide() {
                         <span className="tool-card-icon" style={{ background: tool.color, color: tool.dark }} aria-hidden="true">
                           {tool.name.charAt(0)}
                         </span>
-                        {tool.isProtected && <span className="tool-protected-badge" aria-label="Enterprise protected">P</span>}
                       </div>
                       <span className="tool-card-name">{tool.name}</span>
                       <span className="tool-card-tagline">{tool.tagline}</span>

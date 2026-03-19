@@ -496,11 +496,10 @@ const taskData = [
   { task: 'Extracting action items', tool: 'claude', category: 'meetings' },
   { task: 'Sensitive content handling', tool: 'copilot', category: 'sensitive' },
   { task: 'Confidential information', tool: 'copilot', category: 'sensitive' },
-  { task: 'Personal data tasks', tool: 'copilot', category: 'sensitive' },
 ];
 
 const questions = [
-  { id: 'sensitive', text: 'Does this involve sensitive, personal, or confidential information?', yes: 'copilot-direct', no: 'task-type' },
+  { id: 'sensitive', text: 'Does this involve sensitive, personal, or confidential information?', yes: 'sensitive-stop', no: 'task-type' },
   { id: 'task-type', text: 'What kind of work are you doing?', options: [
     { label: 'Writing something', next: 'writing-type' },
     { label: 'Finding information', next: 'research-type' },
@@ -652,9 +651,8 @@ function GenAIToolGuide() {
   const currentQuestion = questions.find(q => q.id === flowStep);
 
   const handleFlowAnswer = (answer) => {
-    if (answer === 'copilot-direct') {
-      setResult('copilot');
-      setView('result');
+    if (answer === 'sensitive-stop') {
+      setView('sensitive-stop');
     } else if (typeof answer === 'object' && answer.result) {
       setResult(answer.result);
       setView('result');
@@ -3543,6 +3541,49 @@ function GenAIToolGuide() {
             </div>
           )}
 
+          {view === 'sensitive-stop' && (
+            <div className="result-view" role="region" aria-label="Sensitive information guidance">
+              <button className="flow-back-top" onClick={resetFlow}>
+                ← Start over
+              </button>
+              <div className="result-card">
+                <div className="result-badge" style={{ background: 'rgba(255,166,158,0.15)', color: '#FFA69E' }} aria-label="Stop">
+                  <span aria-hidden="true">⚠</span> Stop
+                </div>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+                  Don't use an AI tool for this — yet
+                </h2>
+                <p className="result-reason" style={{ marginBottom: '1rem' }}>
+                  If your task involves sensitive information — personal details about residents,
+                  confidential records, legal matters, or HR information — you must anonymise
+                  the data before using any AI tool.
+                </p>
+                <p className="result-reason" style={{ marginBottom: '1rem' }}>
+                  Anonymising means removing or replacing anything that could identify a specific
+                  person (names, addresses, case numbers, etc.) so the information is no longer personal.
+                </p>
+                <p className="result-reason" style={{ marginBottom: '1rem' }}>
+                  If anonymising is too complicated, not possible, or you're unsure whether you've
+                  done it correctly — don't enter the data. No AI tool is appropriate in that case,
+                  including Copilot Chat.
+                </p>
+                <p className="result-reason" style={{ marginBottom: '1rem' }}>
+                  Being "enterprise protected" means your data stays within Microsoft's systems.
+                  It does not give you permission to enter sensitive or private information as-is.
+                </p>
+                <p className="result-reason" style={{ fontWeight: 600 }}>
+                  If you're unsure, speak to your manager or contact the Data Excellence or
+                  Emerging Technologies teams before proceeding.
+                </p>
+                <div className="result-actions">
+                  <button className="btn btn-secondary" onClick={resetFlow}>
+                    ← Start over — I answered wrong
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {(view === 'flow' || view === 'result') && result && (
             <div className="result-view" role="region" aria-label="Tool recommendation">
               <button className="flow-back-top" onClick={resetFlow}>
@@ -3567,7 +3608,7 @@ function GenAIToolGuide() {
                 </button>
                 
                 <p className="result-reason">
-                  {result === 'copilot' && 'Copilot Chat keeps your data protected. Use it for anything involving sensitive, personal, or confidential information.'}
+                  {result === 'copilot' && 'Copilot Chat integrates deeply with Microsoft 365 and is ideal for meeting support, working with council documents, and day-to-day protected work tasks.'}
                   {result === 'claude' && 'Claude excels at thorough analysis, complex documents, and nuanced writing. Great for policy work and detailed reasoning.'}
                   {result === 'chatgpt' && 'ChatGPT is fast, creative, and conversational. Perfect for brainstorming, quick drafts, and generating ideas.'}
                   {result === 'perplexity' && 'Perplexity specialises in research with real-time sources and citations. Ideal for fact-checking and current information.'}

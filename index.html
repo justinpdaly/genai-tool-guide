@@ -4057,9 +4057,55 @@ function GenAIToolGuide() {
   );
 }
 
+// Error boundary — catches any unhandled render errors and shows a recovery UI
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    console.error('GenAI Guide error:', error, info.componentStack);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'center', minHeight: '100vh', padding: '2rem',
+          fontFamily: 'system-ui, sans-serif', textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
+          <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Something went wrong</h1>
+          <p style={{ opacity: 0.7, marginBottom: '1.5rem' }}>
+            Try refreshing the page. If the problem persists, contact Justin Daly.
+          </p>
+          <button
+            onClick={() => this.setState({ hasError: false, error: null })}
+            style={{
+              padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none',
+              background: '#9ACE6E', color: '#1a1a1a', cursor: 'pointer',
+              fontWeight: 600, fontSize: '1rem'
+            }}
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // Render the app
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<GenAIToolGuide />);
+root.render(
+  <ErrorBoundary>
+    <GenAIToolGuide />
+  </ErrorBoundary>
+);
   </script>
 </body>
 </html>

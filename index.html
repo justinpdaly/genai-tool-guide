@@ -110,28 +110,18 @@ const tools = {
     tagline: 'Creative & conversational', 
     color: '#9ACE6E', 
     dark: '#43491D',
-    description: 'OpenAI\'s flagship conversational AI. Best for creative tasks, brainstorming, quick drafts, and conversational interactions. Now powered by GPT-5.2 with improved reasoning and memory.',
+    description: 'OpenAI\'s flagship conversational AI. Best for creative tasks, brainstorming, quick drafts, and conversational interactions. Free plan includes GPT-5.3 Instant and GPT-5.4 mini for reasoning tasks.',
     models: [
-      { name: 'GPT-5.2 Instant', desc: 'Fast, conversational model optimized for quick responses. Available to all tiers.' },
-      { name: 'GPT-5.2 Thinking', desc: 'Advanced reasoning model for complex analysis. Plus and Pro only.' },
-      { name: 'GPT-5.2 Pro', desc: 'Most powerful model with maximum capabilities. Pro tier only.' },
-      { name: 'GPT-5.1 Auto', desc: 'Automatically routes queries to the best model. Paid tiers.' },
-      { name: 'Legacy models', desc: 'GPT-4o, o3, o4-mini, 4.1 available via "Show additional models" toggle.' }
-    ],
-    tiers: [
-      { name: 'Free', price: '$0', features: 'Basic GPT-5.2 Instant access with usage limits' },
-      { name: 'Go', price: '$8/month', features: '10x more messages, file uploads, image creation, longer memory' },
-      { name: 'Plus', price: '$20/month', features: 'GPT-5.2 Thinking, Codex agent, higher limits' },
-      { name: 'Pro', price: '$200/month', features: 'Full GPT-5.2 Pro, maximum memory/context, early features' }
+      { name: 'GPT-5.3 Instant', desc: 'Default model for everyday tasks. 10 messages per 5-hour window, then switches to GPT-5.4 mini.' },
+      { name: 'GPT-5.4 mini', desc: 'Reasoning model available via the Thinking button. Also serves as fallback when limits are reached.' }
     ],
     keyFeatures: [
       'Web Search — Integrated real-time web search',
-      'Image Generation — Built-in via DALL-E',
-      'Voice Mode — Natural conversation across all tiers',
-      'Memory — Persistent across conversations, improved in January 2026',
-      'Projects — Deep research, file uploads (Plus/Pro)',
-      'Thinking Modes — Standard, Extended, Light, Heavy options',
-      '128K token context window'
+      'Image Generation — 2–3 images per day via DALL-E',
+      'Voice Mode — Limited hours per day of natural voice conversations',
+      'Image & Document Analysis — Upload photos, PDFs, spreadsheets for analysis',
+      'GPT Store — Use Custom GPTs built by others (creating GPTs requires a paid plan)',
+      'Subagent System — Can split complex tasks across multiple model streams'
     ],
     bestFor: [
       'Quick drafts and emails',
@@ -144,13 +134,15 @@ const tools = {
     tips: [
       'Ask for multiple options (e.g., "give me 5 different approaches")',
       'Use it conversationally—refine through back-and-forth',
-      'Enable memory for personalised responses over time',
-      'Use Projects to organise related conversations'
+      'Use the Thinking button for more complex reasoning tasks',
+      'Upload documents directly for analysis rather than copying text'
     ],
     limitations: [
       'Can be confidently wrong—always verify facts',
       'May prioritise engaging over accurate',
-      'Not suitable for sensitive Shire data (use Copilot Chat instead)'
+      'Limited to 10 GPT-5.3 messages per 5 hours before falling back to mini model',
+      'Memory, Projects, Canvas, and Deep Research require a paid plan',
+      'Not suitable for sensitive Shire data'
     ]
   },
   claude: { 
@@ -158,28 +150,17 @@ const tools = {
     tagline: 'Thorough & nuanced', 
     color: '#8CB3FF', 
     dark: '#1E4371',
-    description: 'Anthropic\'s AI assistant. Excels at careful analysis, complex documents, nuanced writing, and coding. Claude Opus 4.5 uses up to 65% fewer tokens than previous models while delivering superior results.',
+    description: 'Anthropic\'s AI assistant. Excels at careful analysis, complex documents, nuanced writing, and coding. Free plan runs on Claude Sonnet 4.5 with a 200K-token context window.',
     models: [
-      { name: 'Claude Opus 4.5', desc: 'Best for coding, agents, complex reasoning. Up to 65% more efficient. November 2025.' },
-      { name: 'Claude Sonnet 4.5', desc: 'Best coding model (77.2% SWE-bench). Can operate autonomously for 30+ hours.' },
-      { name: 'Claude Sonnet 4.5 Thinking', desc: 'Enhanced reasoning mode for deep technical analysis.' },
-      { name: 'Claude 3.7 Sonnet', desc: 'Hybrid reasoning model with adjustable thinking depth.' }
-    ],
-    tiers: [
-      { name: 'Free', price: '$0', features: 'Basic Claude access with usage limits' },
-      { name: 'Pro', price: '$20/month', features: 'Advanced features, web search, memory, health data analysis' },
-      { name: 'Max', price: '$100/month', features: 'Full model access including Opus 4.5 Thinking' },
-      { name: 'Team', price: 'Per seat', features: 'Memory features, incognito chats, collaboration' },
-      { name: 'Enterprise', price: 'Custom', features: 'Full memory, HIPAA-ready options, admin controls' }
+      { name: 'Claude Sonnet 4.5', desc: 'Default model on the free plan. Strong at coding, analysis, and nuanced writing. 200K context window.' }
     ],
     keyFeatures: [
-      'Web Search — Available for paid users (launched March 2025)',
+      'Web Search — Built into conversations for current information',
       'Artifacts — Generate and interact with code, documents, diagrams',
-      'Computer Use — Navigate computers via screen interpretation',
-      'Claude for Chrome — Browser extension for AI agent control',
-      'Memory — Remembers context, generates summaries, incognito option',
-      'Claude Code — Tool-rich agents with dynamic loading',
-      'Agent SDK — Memory handling, permissions, sub-agent coordination'
+      'Projects — Organise conversations with shared context',
+      'App Connectors — Connect to Notion, Slack, Google Workspace, Figma and others',
+      'File Creation — Generate spreadsheets, Word docs, PowerPoint, and PDFs',
+      '200K Token Context — Handle very long documents in a single conversation'
     ],
     bestFor: [
       'Complex or nuanced documents',
@@ -193,12 +174,14 @@ const tools = {
       'Give detailed, structured instructions—Claude follows them precisely',
       'Great for documents with multiple sections or requirements',
       'Use Artifacts for code and content you\'ll use outside the chat',
-      'Enable Thinking mode for complex reasoning tasks'
+      'Use Projects to keep related conversations organised with shared context'
     ],
     limitations: [
       'Can be overly cautious or hedge too much',
       'Sometimes verbose when concise would be better',
-      'Not suitable for sensitive Shire data (use Copilot Chat instead)'
+      'Roughly 30–100 messages per day depending on demand, with 4–8 hour resets',
+      'Extended Thinking, Opus models, and Claude Code require a paid plan',
+      'Not suitable for sensitive Shire data'
     ]
   },
   perplexity: { 
@@ -206,49 +189,37 @@ const tools = {
     tagline: 'Research & citations', 
     color: '#FFC759', 
     dark: '#4E4348',
-    description: 'AI-powered research tool that searches the web in real-time and provides cited answers. Now with Labs for creating reports, spreadsheets, and dashboards. Best when you need current, verifiable information.',
+    description: 'AI-powered research tool that searches the web in real-time and provides cited answers. Best when you need current, verifiable information. Free plan includes unlimited basic searches and a small daily allocation of Pro Searches.',
     models: [
-      { name: 'Sonar', desc: 'Perplexity\'s own model (Llama 3.1 70B). Fast web search and summarisation.' },
-      { name: 'GPT-5.2', desc: 'OpenAI\'s model. Reasoning, coding, creativity with optional advanced reasoning.' },
-      { name: 'Claude Sonnet 4.5', desc: 'Anthropic\'s model. Efficient coding and technical reasoning.' },
-      { name: 'Gemini 3 Pro', desc: 'Google\'s model. Multimodal understanding, always-on reasoning.' },
-      { name: 'Grok 4.1', desc: 'xAI\'s model. Up-to-date search, handles text and images.' },
-      { name: 'Claude Opus 4.5', desc: 'Max subscribers only. Full depth reasoning for complex analysis.' }
-    ],
-    tiers: [
-      { name: 'Free', price: '$0', features: 'Basic searches with limited features' },
-      { name: 'Pro', price: '$20/month', features: 'Unlimited Pro searches, 20 research queries/day, 50 Labs queries/month' },
-      { name: 'Max', price: 'Higher', features: 'Unlimited Labs/research, frontier models, Comet browser, SOC 2 compliant' },
-      { name: 'Enterprise', price: 'Custom', features: 'Organisation-wide features, data insights, no seat minimum' }
+      { name: 'Auto-selected', desc: 'Free plan automatically selects the best available model for each query. No manual model choice.' }
     ],
     keyFeatures: [
-      'Pro Search — In-depth search with 3x sources, model selection',
-      '"Best" Mode — Auto-selects optimal model for each query',
-      'Deep Research — Multi-step analysis, hundreds of sources, comprehensive reports',
-      'Labs — Create reports, spreadsheets, dashboards, web applications',
-      'Memory — Remembers previous searches for smarter follow-ups',
-      '10x Citation Density — Enhanced source attribution',
-      'Image & Video Generation — Built-in capabilities (Pro: 3 videos/month)',
-      'Comet Browser — AI-powered browser with agent actions (Max only)'
+      'Basic Search — Unlimited web searches with cited answers',
+      'Pro Search — Small daily allocation (~5/day) for deeper, multi-source answers',
+      'Citations — Every answer includes source links for verification',
+      'Search History — Access and revisit previous searches',
+      'File Upload — Limited uploads (5MB per file, 3 files per day) for document questions'
     ],
     bestFor: [
       'Current news and recent events',
       'Fact-checking claims',
       'Best practice research with citations',
-      'Academic and scholarly research',
-      'Creating research reports',
+      'Quick verifiable answers',
+      'Getting up-to-date information with sources',
       'Verifying information quickly'
     ],
     tips: [
-      'Use Deep Research for comprehensive analysis on complex topics',
       'Check the cited sources—don\'t just trust the summary',
-      'Try different models for different query types',
-      'Use Labs to generate structured outputs like reports'
+      'Use your Pro Searches for complex questions that need deeper analysis',
+      'Great for fact-checking information from other AI tools',
+      'Keep questions focused for better results on the free plan'
     ],
     limitations: [
       'Less creative than ChatGPT or Claude for writing',
       'Summaries can miss nuance in sources',
       'Quality depends on what\'s available online',
+      'Deep Research, Labs, image/video generation, and model selection require a paid plan',
+      'Can struggle with long threads and detailed multi-step research on free plan',
       'Not suitable for sensitive Shire data'
     ]
   },
@@ -257,26 +228,19 @@ const tools = {
     tagline: 'Google integrated', 
     color: '#FF9DCE', 
     dark: '#4E4348',
-    description: 'Google\'s AI assistant. Now powered by Gemini 3 Pro with always-on reasoning. Strong integration with Google Workspace, NotebookLM, and Google Home. Includes video generation via Veo.',
+    description: 'Google\'s AI assistant. Free plan provides access to Gemini 3 Flash with varying access to 3.1 Pro. Includes image generation, Deep Research, Gemini Live, and NotebookLM.',
     models: [
-      { name: 'Gemini 3 Pro', desc: 'Flagship model with advanced always-on reasoning. Multimodal.' },
-      { name: 'Gemini 2.5 Pro', desc: 'Previous generation. Still very capable with 1M token context.' },
-      { name: 'Nano Banana', desc: 'Image generation model. Standard and Pro versions available.' }
-    ],
-    tiers: [
-      { name: 'Free', price: '$0', features: 'Basic Gemini access with limits' },
-      { name: 'Google AI Pro', price: '$20/month', features: '1,500 Thinking prompts/day, 500 Pro prompts/day, 200 Deep Research reports/day, 10 Deep Think/day' },
-      { name: 'Google AI Ultra', price: '$50/month', features: 'Highest Gemini 3 Pro access, 250 Dynamic view/day, enhanced NotebookLM, scheduled actions' }
+      { name: 'Gemini 3 Flash', desc: 'Default free model. Fast and capable for everyday tasks.' },
+      { name: 'Gemini 3.1 Pro', desc: 'Varying access on free plan. More capable for complex reasoning.' }
     ],
     keyFeatures: [
-      'AI Mode — Search integration with agentic capabilities',
-      'Deep Research — Multi-step analysis and comprehensive reports',
-      'Deep Think — Extended reasoning with 192K token context',
-      'Video Generation — Veo 3.1 (5 videos/day on Pro)',
-      'Image Generation & Editing — Nano Banana models (up to 1,000/day)',
-      'NotebookLM Integration — Audio/video overviews, flashcards, quizzes',
-      'Google Home Integration — Gemini Live on Nest, automation creation',
-      'Jules/Code Assist/CLI — Development tools with high limits'
+      'Deep Research — Multi-step analysis and comprehensive reports (limited on free)',
+      'Image Generation & Editing — Nano Banana 2 model for creating and editing images',
+      'Video Generation — 50 daily AI credits for video via Flow and Whisk',
+      'Gemini Live — Voice conversations with the AI',
+      'Canvas — Interactive workspace for documents and content',
+      'Gems — Customisable AI personas for different tasks',
+      'NotebookLM — Research and writing assistant with audio/video overviews'
     ],
     bestFor: [
       'Tasks involving Google Workspace',
@@ -284,19 +248,20 @@ const tools = {
       'Multimodal tasks (text + images + video)',
       'Research with NotebookLM',
       'Google ecosystem users',
-      'Home automation via Google Home'
+      'Voice conversations via Gemini Live'
     ],
     tips: [
-      'Use Deep Think for complex reasoning (limited daily use)',
       'NotebookLM is excellent for analysing multiple documents together',
-      'Try AI Mode for search queries that need reasoning',
-      'Gemini 3 Pro\'s always-on reasoning means no manual toggle needed'
+      'Use Deep Research for comprehensive analysis on complex topics',
+      'Try Gems to create custom AI personas for recurring tasks',
+      'Upload images directly — Gemini handles multimodal input well'
     ],
     limitations: [
-      'Some features require Google AI Pro/Ultra subscription',
+      'Full Gemini 3.1 Pro access requires a paid subscription',
+      'Deep Think, Code Assist, and Gemini in Gmail/Docs require paid plans',
       'Best value if you\'re already in Google ecosystem',
-      'Video generation has daily limits',
-      'Not suitable for sensitive Shire data (use Copilot Chat instead)'
+      'Video generation limited to 50 daily AI credits on free plan',
+      'Not suitable for sensitive Shire data'
     ]
   },
   copilot: { 
@@ -304,43 +269,37 @@ const tools = {
     tagline: 'Enterprise protected', 
     color: '#FFA69E', 
     dark: '#203E3C',
-    description: 'Microsoft\'s enterprise-protected AI. Use this whenever your task involves sensitive, personal, or confidential information. Now powered by GPT-5 with Claude integration rolling out January 2026. Your data stays within Microsoft\'s service boundary.',
+    description: 'Microsoft\'s enterprise-protected AI, included with the Shire\'s M365 licence at no extra cost. Your data stays within Microsoft\'s service boundary and is never used for model training. Uses auto-routed models with Quick Response and Think Deeper modes.',
     models: [
-      { name: 'GPT-5', desc: 'Default model powering all Copilot Chat experiences.' },
-      { name: 'GPT-5.2', desc: 'Latest model with enhanced prompting capabilities.' },
-      { name: 'Claude (Anthropic)', desc: 'Now integrated for enhanced reasoning and summarisation. Rolling out January 18–31, 2026.' }
-    ],
-    tiers: [
-      { name: 'Copilot Chat', price: 'Free*', features: 'Enterprise-protected AI chat for all M365 users. *Included with Shire M365 license.' },
-      { name: 'M365 Copilot', price: '$30/user/month', features: 'Full integration with your emails, documents, calendar, Teams. Not widely deployed at Shire.' }
+      { name: 'Auto-routed', desc: 'Copilot automatically selects the best model based on your prompt — Quick Response for simple questions, Think Deeper for complex ones.' }
     ],
     keyFeatures: [
       'Enterprise Data Protection — Your data is never used for training',
-      'M365 Integration — Access Outlook inbox, calendar, Teams, meeting transcripts (M365 Copilot only)',
-      'Agent Mode — Works in Word, Excel, PowerPoint using web data and files',
-      'Claude Agent — Specialised agents powered by Claude model',
-      'Memory — Past chat reference, memory citations, temporary chat mode',
-      'Voice Notes — Record and convert to summaries in mobile app (coming Feb 2026)',
-      'Multi-Turn Conversations — Improved follow-ups and continuity',
-      'Declarative Agents — GPT-5 powered agents with advanced reasoning'
+      'Web-Grounded Chat — Answers grounded in web data with enterprise security',
+      'File Upload — Upload documents for analysis directly in chat',
+      'Image Generation — Built-in image creation (standard access, subject to capacity)',
+      'Copilot Pages — Collaborative AI-generated content',
+      'Side Pane in Office Apps — Available alongside Word, Excel, PowerPoint, Outlook, and OneNote',
+      'Edge Sidebar — Quick access to Copilot Chat from the browser'
     ],
     bestFor: [
       'Any task with sensitive information',
       'Confidential documents',
       'Personal data handling',
       'Internal communications',
-      'Meeting transcription (Teams)',
+      'Quick analysis while working in Office apps',
       'When data protection is required'
     ],
     tips: [
       'Default to this for anything you wouldn\'t share publicly',
-      'Same underlying capability as ChatGPT, with enterprise protection',
-      'Available to all Shire staff via M365',
-      'Use temporary chat mode when you don\'t want conversation saved'
+      'Available to all Shire staff via M365 — no extra licence needed',
+      'Use the side pane in Word or Outlook for help while you work',
+      'Upload files directly rather than copying text into the chat'
     ],
     limitations: [
-      'Copilot Chat cannot search your M365 data (emails, SharePoint)—that requires M365 Copilot license',
-      'Some features rolling out gradually through early 2026',
+      'Cannot search your M365 data (emails, SharePoint, Teams) — that requires a paid M365 Copilot licence',
+      'Standard access only — during peak times, features may be temporarily limited',
+      'From April 15, 2026, in-app Copilot in Office apps moves to paid M365 Copilot only — free users will use the standalone Copilot app',
       'May feel slightly less polished than consumer tools'
     ],
     isProtected: true
@@ -348,17 +307,17 @@ const tools = {
 };
 
 const comparisonFeatures = [
-  { feature: 'Web Search', chatgpt: true, gemini: true, claude: 'paid', copilot: true, perplexity: 'core' },
-  { feature: 'Image Generation', chatgpt: true, gemini: true, claude: false, copilot: true, perplexity: true },
-  { feature: 'Video Generation', chatgpt: false, gemini: true, claude: false, copilot: false, perplexity: true },
-  { feature: 'Voice Mode', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: true },
-  { feature: 'Code Execution', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: 'labs' },
-  { feature: 'Memory', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: true },
+  { feature: 'Web Search', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: 'core' },
+  { feature: 'Image Generation', chatgpt: true, gemini: true, claude: false, copilot: true, perplexity: 'paid' },
+  { feature: 'Video Generation', chatgpt: false, gemini: true, claude: false, copilot: false, perplexity: 'paid' },
+  { feature: 'Voice Mode', chatgpt: true, gemini: true, claude: false, copilot: true, perplexity: false },
+  { feature: 'Code Execution', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: 'paid' },
+  { feature: 'Memory', chatgpt: 'paid', gemini: true, claude: false, copilot: true, perplexity: false },
   { feature: 'File Analysis', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: true },
-  { feature: 'Deep Research', chatgpt: false, gemini: true, claude: false, copilot: false, perplexity: true },
+  { feature: 'Deep Research', chatgpt: 'paid', gemini: true, claude: false, copilot: false, perplexity: 'paid' },
   { feature: 'Browser Extension', chatgpt: false, gemini: false, claude: true, copilot: true, perplexity: true },
   { feature: 'Enterprise Protected', chatgpt: false, gemini: false, claude: false, copilot: true, perplexity: false },
-  { feature: 'Agent Capabilities', chatgpt: true, gemini: true, claude: true, copilot: true, perplexity: 'labs' }
+  { feature: 'Agent Capabilities', chatgpt: 'paid', gemini: true, claude: false, copilot: true, perplexity: 'paid' }
 ];
 
 const costarSteps = [
@@ -1414,58 +1373,6 @@ function GenAIToolGuide() {
           color: #EBEAE5;
         }
 
-        .profile-tiers {
-          margin-bottom: 2.5rem;
-        }
-
-        .tiers-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1rem;
-        }
-
-        .tier-card {
-          background: rgba(235,234,229,0.04);
-          border: 1px solid rgba(235,234,229,0.1);
-          border-radius: 14px;
-          padding: 1.25rem;
-          transition: all 0.2s ease;
-        }
-
-        .tier-card:hover {
-          background: rgba(235,234,229,0.07);
-          border-color: rgba(235,234,229,0.15);
-        }
-
-        .tier-card.free {
-          border-color: rgba(154,206,110,0.3);
-          background: rgba(154,206,110,0.05);
-        }
-
-        .tier-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          margin-bottom: 0.75rem;
-          gap: 0.5rem;
-        }
-
-        .tier-name {
-          font-weight: 600;
-          font-size: 1rem;
-        }
-
-        .tier-price {
-          font-size: 0.85rem;
-          color: #9ACE6E;
-          font-weight: 500;
-        }
-
-        .tier-features {
-          font-size: 0.85rem;
-          line-height: 1.5;
-          opacity: 0.7;
-        }
 
         /* Profile Features Section */
         .profile-features {
@@ -3135,7 +3042,6 @@ function GenAIToolGuide() {
           .compare-table { font-size: 0.8rem; }
           .compare-table th, .compare-table td { padding: 0.75rem 0.5rem; }
           .compare-legend { gap: 1rem; font-size: 0.75rem; }
-          .tiers-grid { grid-template-columns: 1fr; }
           .builder-layout { grid-template-columns: 1fr; }
           .builder-preview-panel { display: none; }
           .builder-question { font-size: 1.35rem; }
@@ -3299,22 +3205,6 @@ function GenAIToolGuide() {
                 </button>
               </div>
 
-              {/* Tiers Section */}
-              {tools[selectedTool].tiers && (
-                <div className="profile-tiers">
-                  <h3 className="section-title">Subscription Tiers</h3>
-                  <div className="tiers-grid">
-                    {tools[selectedTool].tiers.map((tier, i) => (
-                      <div key={i} className={`tier-card ${i === 0 ? 'free' : ''}`}>
-                        <div className="tier-header">
-                          <span className="tier-name">{tier.name}</span>
-                          <span className="tier-price">{tier.price}</span>
-                        </div>
-                        <p className="tier-features">{tier.features}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               )}
 
               {/* Key Features Section */}
@@ -3717,13 +3607,13 @@ function GenAIToolGuide() {
               </div>
 
               <div className="compare-legend">
-                <span><span className="legend-yes">✓</span> Full support</span>
-                <span><span className="legend-partial">paid</span> Requires subscription</span>
+                <span><span className="legend-yes">✓</span> Available on free plan</span>
+                <span><span className="legend-partial">paid</span> Requires paid subscription</span>
                 <span><span className="legend-no">—</span> Not available</span>
               </div>
 
               <div className="compare-note">
-                <p>Click any tool name to view its full profile. Feature availability may vary by subscription tier.</p>
+                <p>Click any tool name to view its full profile. This table reflects features available on the free plan that Council staff use.</p>
               </div>
             </div>
           )}
